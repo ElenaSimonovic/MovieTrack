@@ -3,7 +3,23 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
+      { path: 'pretraga-filmova', component: () => import('pages/PretragaFilmova.vue') },
+      { path: 'login', component: () => import('pages/LoginPage.vue') },
+      { path: 'register', component: () => import('pages/RegistracijaPage.vue') },
+      { path: 'mylists', component: () => import('pages/MojeListe.vue') },
+      { path: 'community', component: () => import('pages/CommunityPage.vue') },
+
+    ]
+  },
+
+   {
+    path: '/admin',
+    component: () => import('layouts/AdminLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/AdminIndexPage.vue') },
+      { path: 'manage-movies', component: () => import('pages/ManageMoviesPage.vue') },
+      { path: 'manage-comments', component: () => import('pages/ManageCommentsPage.vue') },
+      { path: 'logout', component: () => import('pages/LogoutPage.vue') }
     ]
   },
 

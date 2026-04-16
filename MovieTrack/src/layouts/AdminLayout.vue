@@ -55,34 +55,22 @@ defineOptions({
 
 const linksList = [
   {
-    title: 'Pretraga filmova',
-    caption: 'Pogledaj našu bazu filmova',
+    title: 'Manage Movies',
+    caption: 'upravljanje filmovima',
     icon: 'movie',
-    link: '/pretraga-filmova'
+    link: 'manage-movies'
   },
   {
-    title: 'Moje liste',
-    caption: 'Pogledaj i upravljaj svojim listama filmova',
-    icon: 'note',
-    link: '/mylists'
+    title: 'Manage Comments',
+    caption: 'upravljanje komentarima',
+    icon: 'comment',
+    link: 'manage-comments'
   },
-  {
-    title: 'Community',
-    caption: 'Chat with the community',
-    icon: 'chat',
-    link: '/community'
-  },
-  {
-    title: 'Login',
-    caption: 'Prijavi se na svoj račun',
-    icon: 'login',
-    link: '/login'
-  },
-  {
-    title: 'Registracija',
-    caption: 'Kreiraj novi račun',
-    icon: 'person_add',
-    link: '/register'
+   {
+    title: 'Log out',
+    caption: 'odjava iz sistema',
+    icon: 'logout',
+    link: 'logout'
   }
 ]
 
