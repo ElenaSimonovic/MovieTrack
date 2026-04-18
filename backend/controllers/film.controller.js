@@ -73,3 +73,17 @@ exports.filter = (req, res) => {
         }
     );
 };
+
+
+exports.search = (req, res) => {
+    const { query } = req.query;
+
+    dbConn.query(
+        "SELECT * FROM Film WHERE Naziv_filma LIKE ?",
+        [`%${query}%`],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+            res.send(result);
+        }
+    );
+};

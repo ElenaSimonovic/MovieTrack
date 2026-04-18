@@ -2,13 +2,17 @@ const express = require('express');
 const router = express.Router();
 const lista = require('../controllers/lista.controller');
 
-router.get('/:email', lista.getByUser);
-router.get('/:email/:naziv', lista.getMoviesFromList);
+// CREATE
+router.post('/', lista.createList);
 
-router.post('/', lista.create);
-router.post('/film', lista.addFilm);
+// ADD / REMOVE FILM
+router.post('/film', lista.addFilmToList);
+router.delete('/film', lista.removeFilmFromList);
 
-router.delete('/', lista.delete);
-router.delete('/film', lista.removeFilm);
+// DELETE LIST
+router.delete('/', lista.deleteList);
+
+// GET FILMS FROM LIST
+router.get('/lista/:id', lista.getFilmsFromList);
 
 module.exports = router;

@@ -73,3 +73,17 @@ exports.getFilmsFromList = (req, res) => {
         }
     );
 };
+
+exports.getListsByUser = (req, res) => {
+    const { email } = req.params;
+
+    dbConn.query(
+        "SELECT * FROM Osobna_lista WHERE Email_korisnika=?",
+        [email],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+            res.send(result);
+        }
+    );
+};
+
