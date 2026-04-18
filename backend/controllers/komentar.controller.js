@@ -26,18 +26,6 @@ exports.create = (req, res) => {
     );
 };
 
-// dohvati komentare po filmu (duplicate endpoint, ali ostavljen kao u tvom kodu)
-exports.getAllByFilm = (req, res) => {
-    dbConn.query(
-        "SELECT * FROM Komentar WHERE Naziv_filma=?",
-        [req.params.film],
-        (err, result) => {
-            if (err) return res.status(500).send(err);
-            res.send(result);
-        }
-    );
-};
-
 // delete komentar
 exports.remove = (req, res) => {
     const { id_komentara } = req.body;
