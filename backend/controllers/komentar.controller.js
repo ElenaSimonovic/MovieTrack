@@ -13,21 +13,21 @@ exports.getByFilm = (req, res) => {
 };
 
 // dodaj komentar
-app.post('/komentar', (req, res) => {
+exports.create = (req, res) => {
     const { email, film, sadrzaj, ocjena } = req.body;
 
     dbConn.query(
-        "INSERT INTO Komentar VALUES (NOW(), ?, NULL, ?, ?, ?)",
+        "INSERT INTO Komentar (Datum_i_vrijeme_objave, Email_korisnika, Naziv_filma, Sadrzaj_komentara, Ocjena) VALUES (NOW(), ?, ?, ?, ?)",
         [email, film, sadrzaj, ocjena],
         (err) => {
             if (err) return res.status(500).send(err);
             res.send("Komentar dodan");
         }
     );
-});
+};
 
-// dohvati komentare po filmu
-app.get('/komentari/:film', (req, res) => {
+// dohvati komentare po filmu (duplicate endpoint, ali ostavljen kao u tvom kodu)
+exports.getAllByFilm = (req, res) => {
     dbConn.query(
         "SELECT * FROM Komentar WHERE Naziv_filma=?",
         [req.params.film],
@@ -36,10 +36,10 @@ app.get('/komentari/:film', (req, res) => {
             res.send(result);
         }
     );
-});
+};
 
 // delete komentar
-app.delete('/komentar', (req, res) => {
+exports.remove = (req, res) => {
     const { id_komentara } = req.body;
 
     dbConn.query(
@@ -50,5 +50,4 @@ app.delete('/komentar', (req, res) => {
             res.send("Komentar obrisan");
         }
     );
-});
-
+};

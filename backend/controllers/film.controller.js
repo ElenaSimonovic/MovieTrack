@@ -21,7 +21,7 @@ exports.getOne = (req, res) => {
 };
 
 // dodaj film
-app.post('/film', (req, res) => {
+exports.create = (req, res) => {
     const { naziv, godina, opis, zanr, jezik } = req.body;
 
     dbConn.query(
@@ -32,22 +32,10 @@ app.post('/film', (req, res) => {
             res.send("Film dodan");
         }
     );
-});
-
-// jedan film
-app.get('/film/:naziv', (req, res) => {
-    dbConn.query(
-        "SELECT * FROM Film WHERE Naziv_filma=?",
-        [req.params.naziv],
-        (err, result) => {
-            if (err) return res.status(500).send(err);
-            res.send(result[0]);
-        }
-    );
-});
+};
 
 // update film
-app.put('/film/:naziv', (req, res) => {
+exports.update = (req, res) => {
     const { godina, opis, zanr, jezik } = req.body;
 
     dbConn.query(
@@ -58,10 +46,10 @@ app.put('/film/:naziv', (req, res) => {
             res.send("Film ažuriran");
         }
     );
-});
+};
 
 // delete film
-app.delete('/film/:naziv', (req, res) => {
+exports.remove = (req, res) => {
     dbConn.query(
         "DELETE FROM Film WHERE Naziv_filma=?",
         [req.params.naziv],
@@ -70,10 +58,10 @@ app.delete('/film/:naziv', (req, res) => {
             res.send("Film obrisan");
         }
     );
-});
+};
 
-// filter
-app.get('/filmovi/filter', (req, res) => {
+// filter filmova
+exports.filter = (req, res) => {
     const { zanr, godina } = req.query;
 
     dbConn.query(
@@ -84,5 +72,4 @@ app.get('/filmovi/filter', (req, res) => {
             res.send(result);
         }
     );
-});
-
+};

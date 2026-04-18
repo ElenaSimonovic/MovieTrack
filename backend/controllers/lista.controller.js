@@ -1,21 +1,21 @@
 const dbConn = require('../db/connection');
 
 // kreiraj listu
-app.post('/lista', (req, res) => {
+exports.createList = (req, res) => {
     const { email, naziv, opis, status } = req.body;
 
     dbConn.query(
-        "INSERT INTO Osobna_lista VALUES (?, ?, ?, ?)",
+        "INSERT INTO Osobna_lista (Naziv_liste, Email_korisnika, Opis_liste, Status_vidljivosti) VALUES (?, ?, ?, ?)",
         [naziv, email, opis, status],
         (err) => {
             if (err) return res.status(500).send(err);
             res.send("Lista kreirana");
         }
     );
-});
+};
 
 // obriši listu
-app.delete('/lista', (req, res) => {
+exports.deleteList = (req, res) => {
     const { id_osobne_liste } = req.body;
 
     dbConn.query(
@@ -26,10 +26,10 @@ app.delete('/lista', (req, res) => {
             res.send("Lista obrisana");
         }
     );
-});
+};
 
 // dodaj film u listu
-app.post('/lista/film', (req, res) => {
+exports.addFilmToList = (req, res) => {
     const { id_osobne_liste, nazivFilma } = req.body;
 
     dbConn.query(
@@ -40,10 +40,10 @@ app.post('/lista/film', (req, res) => {
             res.send("Film dodan u listu");
         }
     );
-});
+};
 
 // makni film iz liste
-app.delete('/lista/film', (req, res) => {
+exports.removeFilmFromList = (req, res) => {
     const { id_osobne_liste, nazivFilma } = req.body;
 
     dbConn.query(
@@ -54,18 +54,22 @@ app.delete('/lista/film', (req, res) => {
             res.send("Film uklonjen iz liste");
         }
     );
-});
+};
 
 // dohvati filmove iz liste
-app.get('/lista/:id', (req, res) => {
+exports.getFilmsFromList = (req, res) => {
     const { id } = req.params;
 
     dbConn.query(
-        "SELECT f.* FROM Film f JOIN Film_u_osobnoj_listi l ON f.Naziv_filma = l.Naziv_filma WHERE l.id_osobne_liste = ?",
+        `SELECT f.* 
+         FROM Film f 
+         JOIN Film_u_osobnoj_listi l 
+         ON f.Naziv_filma = l.Naziv_filma 
+         WHERE l.id_osobne_liste = ?`,
         [id],
         (err, result) => {
             if (err) return res.status(500).send(err);
             res.send(result);
         }
     );
-});
+};
