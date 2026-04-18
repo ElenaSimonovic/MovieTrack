@@ -13,7 +13,7 @@ exports.getByFilm = (req, res) => {
 };
 
 // dodaj komentar
-exports.addKomentar = (req, res) => {
+app.post('/komentar', (req, res) => {
     const { email, film, sadrzaj, ocjena } = req.body;
 
     dbConn.query(
@@ -24,32 +24,31 @@ exports.addKomentar = (req, res) => {
             res.send("Komentar dodan");
         }
     );
-};
+});
 
-// update komentar
-exports.updateKomentar = (req, res) => {
-    const { email, datum, sadrzaj, ocjena } = req.body;
-
+// dohvati komentare po filmu
+app.get('/komentari/:film', (req, res) => {
     dbConn.query(
-        "UPDATE Komentar SET Sadrzaj_komentara=?, Ocjena=? WHERE Email_korisnika=? AND Datum_i_vrijeme_objave=?",
-        [sadrzaj, ocjena, email, datum],
-        (err) => {
+        "SELECT * FROM Komentar WHERE Naziv_filma=?",
+        [req.params.film],
+        (err, result) => {
             if (err) return res.status(500).send(err);
-            res.send("Komentar ažuriran");
+            res.send(result);
         }
     );
-};
+});
 
 // delete komentar
-exports.deleteKomentar = (req, res) => {
-    const { email, datum } = req.body;
+app.delete('/komentar', (req, res) => {
+    const { id_komentara } = req.body;
 
     dbConn.query(
-        "DELETE FROM Komentar WHERE Email_korisnika=? AND Datum_i_vrijeme_objave=?",
-        [email, datum],
+        "DELETE FROM Komentar WHERE id_komentara = ?",
+        [id_komentara],
         (err) => {
             if (err) return res.status(500).send(err);
             res.send("Komentar obrisan");
         }
     );
-};
+});
+

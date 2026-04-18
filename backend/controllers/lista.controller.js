@@ -1,7 +1,7 @@
 const dbConn = require('../db/connection');
 
 // kreiraj listu
-exports.create = (req, res) => {
+app.post('/lista', (req, res) => {
     const { email, naziv, opis, status } = req.body;
 
     dbConn.query(
@@ -12,76 +12,60 @@ exports.create = (req, res) => {
             res.send("Lista kreirana");
         }
     );
-};
+});
 
 // obriši listu
-exports.delete = (req, res) => {
-    const { email, naziv } = req.body;
+app.delete('/lista', (req, res) => {
+    const { id_osobne_liste } = req.body;
 
     dbConn.query(
-        "DELETE FROM Osobna_lista WHERE Naziv_liste=? AND Email_korisnika=?",
-        [naziv, email],
+        "DELETE FROM Osobna_lista WHERE id_osobne_liste = ?",
+        [id_osobne_liste],
         (err) => {
             if (err) return res.status(500).send(err);
             res.send("Lista obrisana");
         }
     );
-};
-
-// dohvati liste korisnika
-exports.getByUser = (req, res) => {
-    dbConn.query(
-        "SELECT * FROM Osobna_lista WHERE Email_korisnika=?",
-        [req.params.email],
-        (err, result) => {
-            if (err) return res.status(500).send(err);
-            res.send(result);
-        }
-    );
-};
+});
 
 // dodaj film u listu
-exports.addFilm = (req, res) => {
-    const { email, nazivListe, nazivFilma } = req.body;
+app.post('/lista/film', (req, res) => {
+    const { id_osobne_liste, nazivFilma } = req.body;
 
     dbConn.query(
-        "INSERT INTO Film_u_osobnoj_listi VALUES (?, ?, ?)",
-        [nazivListe, email, nazivFilma],
+        "INSERT INTO Film_u_osobnoj_listi (id_osobne_liste, Naziv_filma) VALUES (?, ?)",
+        [id_osobne_liste, nazivFilma],
         (err) => {
             if (err) return res.status(500).send(err);
-            res.send("Dodano u listu");
+            res.send("Film dodan u listu");
         }
     );
-};
+});
 
 // makni film iz liste
-exports.removeFilm = (req, res) => {
-    const { email, nazivListe, nazivFilma } = req.body;
+app.delete('/lista/film', (req, res) => {
+    const { id_osobne_liste, nazivFilma } = req.body;
 
     dbConn.query(
-        "DELETE FROM Film_u_osobnoj_listi WHERE Naziv_liste=? AND Email_korisnika=? AND Naziv_filma=?",
-        [nazivListe, email, nazivFilma],
+        "DELETE FROM Film_u_osobnoj_listi WHERE id_osobne_liste=? AND Naziv_filma=?",
+        [id_osobne_liste, nazivFilma],
         (err) => {
             if (err) return res.status(500).send(err);
-            res.send("Maknuto iz liste");
+            res.send("Film uklonjen iz liste");
         }
     );
-};
+});
 
 // dohvati filmove iz liste
-exports.getMoviesFromList = (req, res) => {
-    const { email, naziv } = req.params;
+app.get('/lista/:id', (req, res) => {
+    const { id } = req.params;
 
     dbConn.query(
-        `SELECT f.* 
-         FROM Film f
-         JOIN Film_u_osobnoj_listi l 
-         ON f.Naziv_filma = l.Naziv_filma
-         WHERE l.Email_korisnika=? AND l.Naziv_liste=?`,
-        [email, naziv],
+        "SELECT f.* FROM Film f JOIN Film_u_osobnoj_listi l ON f.Naziv_filma = l.Naziv_filma WHERE l.id_osobne_liste = ?",
+        [id],
         (err, result) => {
             if (err) return res.status(500).send(err);
             res.send(result);
         }
     );
-};
+});
