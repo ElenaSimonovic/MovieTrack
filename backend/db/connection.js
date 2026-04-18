@@ -1,5 +1,5 @@
 const mysql = require('mysql');
-const dbConfig = require('dbConfig');
+const dbConfig = require('../dbConfig');
 
 const dbConn = mysql.createConnection({
     host: dbConfig.HOST,
