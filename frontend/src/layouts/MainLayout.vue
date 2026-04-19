@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+    <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-btn
           flat
@@ -11,8 +11,11 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title>
-          Quasar App
+        <q-toolbar-title 
+          @click="$router.push('/pretraga-filmova')" 
+          style="cursor: pointer;"
+        >
+          MovieTrack
         </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
@@ -23,19 +26,28 @@
       v-model="leftDrawerOpen"
       show-if-above
       bordered
+      class="bg-grey-1"
     >
       <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
+        <q-item-label header>
+          Glavni Izbornik
         </q-item-label>
 
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
+        <q-item 
+          v-for="link in linksList" 
+          :key="link.title" 
+          clickable 
+          :to="link.link"
+        >
+          <q-item-section avatar v-if="link.icon">
+            <q-icon :name="link.icon" />
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label>{{ link.title }}</q-item-label>
+            <q-item-label caption>{{ link.caption }}</q-item-label>
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
@@ -47,7 +59,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
 
 defineOptions({
   name: 'MainLayout'
@@ -62,7 +73,7 @@ const linksList = [
   },
   {
     title: 'Moje liste',
-    caption: 'Pogledaj i upravljaj svojim listama filmova',
+    caption: 'Upravljaj svojim listama filmova',
     icon: 'note',
     link: '/mylists'
   },
@@ -92,3 +103,11 @@ function toggleLeftDrawer () {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 </script>
+
+<style scoped>
+/* Dodatni stil za naslov da izgleda profesionalnije */
+.q-toolbar-title {
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+</style>

@@ -2,13 +2,14 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
+    redirect: '/pretraga-filmova',
     children: [
       { path: 'pretraga-filmova', component: () => import('pages/PretragaFilmova.vue') },
       { path: 'login', component: () => import('pages/LoginPage.vue') },
       { path: 'register', component: () => import('pages/RegistracijaPage.vue') },
       { path: 'mylists', component: () => import('pages/MojeListe.vue') },
       { path: 'community', component: () => import('pages/CommunityPage.vue') },
-
+      { path: 'film/:naziv', name: 'OpisFilma', component: () => import('pages/OpisFilma.vue') }
     ]
   },
 

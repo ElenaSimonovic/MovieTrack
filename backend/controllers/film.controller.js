@@ -62,18 +62,18 @@ exports.remove = (req, res) => {
 
 // filter filmova
 exports.filter = (req, res) => {
-    const { zanr, godina } = req.query;
+    const { zanr } = req.query;
 
+    // Koristimo LIKE i postotke (%) da pronađemo žanr bilo gdje u tekstu
     dbConn.query(
-        "SELECT * FROM Film WHERE Zanr_filma=? AND YEAR(Godina_proizvodnje)=?",
-        [zanr, godina],
+        "SELECT * FROM Film WHERE Zanr_filma LIKE ?", 
+        [`%${zanr}%`], // Ovo će tražiti npr. "Akcija" unutar "Akcija, SF"
         (err, result) => {
             if (err) return res.status(500).send(err);
             res.send(result);
         }
     );
 };
-
 
 exports.search = (req, res) => {
     const { query } = req.query;

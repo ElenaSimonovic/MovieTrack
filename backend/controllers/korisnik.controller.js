@@ -1,52 +1,67 @@
 const dbConn = require('../db/connection');
 const bcrypt = require('bcrypt');
 
-exports.registracija = async (req, res) => {
+exports.registracija = (req, res) => {
     const { email, korisnickoIme, lozinka, datumRodjenja } = req.body;
 
-    const hash = await bcrypt.hash(lozinka, 10);
-
+    // DIREKTNO šaljemo lozinku u bazu bez ikakvog šifriranja
+    const sql = `
+        INSERT INTO Korisnik 
+        (Email_korisnika, Lozinka, Korisnicko_ime, Datum_rodjenja, Status_racuna, Admin_da_ne) 
+        VALUES (?, ?, ?, ?, 'Aktivan', 0)
+    `;
+    
     dbConn.query(
-        "INSERT INTO Korisnik VALUES (?, ?, ?, ?, 'Aktivan')",
-        [email, hash, korisnickoIme, datumRodjenja],
+        sql,
+        [email, lozinka, korisnickoIme, datumRodjenja],
         (err) => {
-            if (err) return res.status(500).send(err);
+            if (err) {
+                return res.status(500).send("Greška baze: " + err.sqlMessage);
+            }
             res.send("Registracija OK");
         }
     );
 };
 
 exports.prijava = (req, res) => {
-    const { email, lozinka } = req.body;
+    // 1. Podaci koji dolaze s frontenda (v-model="loginData.email")
+    const { email, lozinka } = req.body; 
 
-    dbConn.query(
-        "SELECT * FROM Korisnik WHERE Email_korisnika=?",
-        [email],
-        async (err, result) => {
-            if (err) return res.status(500).send(err);
-            if (result.length === 0) return res.status(404).send("Ne postoji");
+    // 2. SQL upit s točnim nazivom stupca: Email_korisnika
+    const sql = "SELECT * FROM Korisnik WHERE Email_korisnika = ?";
+    
+    dbConn.query(sql, [email], (err, result) => {
+        if (err) {
+            console.error("Greška u bazi:", err);
+            return res.status(500).send("Greška na serveru.");
+        }
 
-            const user = result[0];
-            const match = await bcrypt.compare(lozinka, user.Lozinka);
+        // Provjera je li korisnik pronađen
+        if (result.length === 0) {
+            return res.status(404).send("Korisnik s tim emailom ne postoji.");
+        }
 
-            if (!match) return res.status(401).send("Kriva lozinka");
+        const user = result[0];
 
-            // GENERIRAJ TOKEN
-            const token = jwt.sign(
-                {
-                    email: user.Email_korisnika,
-                    korisnickoIme: user.Korisnicko_ime
-                },
-                SECRET,
-                { expiresIn: "2h" }
-            );
+        // 3. USPOREDBA (Pazi na velika slova!)
+        // 'lozinka' je ono što je korisnik upravo utipkao
+        // 'user.Lozinka' je ono što piše u bazi (veliko L)
+        if (lozinka === user.Lozinka) {
+            
+            // Ako želiš generirati token (ako imaš instaliran jsonwebtoken)
+            // const token = jwt.sign({ id: user.id }, "tvoja_tajna", { expiresIn: '1h' });
 
             res.send({
-                message: "Login uspješan",
-                token: token
+                message: "Prijava uspješna",
+                Korisnicko_ime: user.Korisnicko_ime 
             });
+            
+        } else {
+            // Ako lozinka ne odgovara
+            console.log("Neuspjela prijava za email:", email);
+            res.status(401).send("Pogrešna lozinka.");
         }
-    );
+    });
 };
 
 exports.obrisiKorisnika = (req, res) => {
