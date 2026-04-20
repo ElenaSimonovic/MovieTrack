@@ -11,8 +11,8 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title 
-          @click="$router.push('/pretraga-filmova')" 
+        <q-toolbar-title
+          @click="$router.push('/pretraga-filmova')"
           style="cursor: pointer;"
         >
           MovieTrack
@@ -24,7 +24,7 @@
 
     <q-drawer
       v-model="leftDrawerOpen"
-      show-if-above
+
       bordered
       class="bg-grey-1"
     >
@@ -33,10 +33,10 @@
           Glavni Izbornik
         </q-item-label>
 
-        <q-item 
-          v-for="link in linksList" 
-          :key="link.title" 
-          clickable 
+        <q-item
+          v-for="link in linksList"
+          :key="link.title"
+          clickable
           :to="link.link"
         >
           <q-item-section avatar v-if="link.icon">
