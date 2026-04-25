@@ -101,10 +101,10 @@
 
     <!-- DIALOG -->
     <q-dialog v-model="dialog">
-      <q-card style="min-width:300px">
+      <q-card style="width:444px">
 
         <q-card-section>
-          <div class="text-h6">Odaberi listu</div>
+          <div>Odaberi listu</div>
         </q-card-section>
 
         <q-card-section>
@@ -115,7 +115,7 @@
             option-value="id_osobne_liste"
             emit-value
             map-options
-            label="Moje liste"
+            label="Ime liste:"
           />
         </q-card-section>
 
