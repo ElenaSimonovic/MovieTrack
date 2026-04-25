@@ -1,42 +1,62 @@
 <template>
-  <q-page class="flex flex-center column">
-    <img
-      alt="Quasar logo"
-      src="~assets/quasar-logo-vertical.svg"
-      style="width: 200px; height: 200px"
-    />
+<q-page class="q-pa-md">
 
+  <div class="row items-center q-mb-md">
     <q-btn
       label="Kreiraj listu"
-      color="primary"
       @click="dialog = true"
-      class="q-mt-md"
+      unelevated
+      style="background:#26A69A; color:white;"
     />
+  </div>
 
-    <!-- DIALOG -->
-    <q-dialog v-model="dialog">
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Nova lista</div>
-        </q-card-section>
+  <div class="column q-gutter-sm">
+    <q-card
+      v-for="list in lists"
+      :key="list.id_osobne_liste"
+      class="full-width"
+      style="background: #F4F5F4;"
+    >
+      <q-card-section class="row items-center justify-between">
 
-        <q-card-section class="q-gutter-md">
-          <q-input v-model="naziv" label="Naziv liste" />
-          <q-input v-model="opis" label="Opis liste" type="textarea" />
+        <div>
+          <div class="text-h6">{{ list.Naziv_liste }}</div>
+          <div class="text-caption">{{ list.Opis_liste }}</div>
+        </div>
 
-          <q-checkbox
-            v-model="isPrivate"
-            label="Privatna lista"
-          />
-        </q-card-section>
+<q-badge>
+  <q-icon
+    :name="list.Status_vidljivosti === 'Privatna' ? 'lock' : 'visibility'"
+  />
+</q-badge>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Odustani" v-close-popup />
-          <q-btn color="primary" label="Spremi" @click="createLista" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-  </q-page>
+      </q-card-section>
+    </q-card>
+
+  </div>
+
+  <q-dialog v-model="dialog">
+    <q-card style="min-width:350px">
+
+      <q-card-section>
+        <div>Stvaranje nove liste:</div>
+      </q-card-section>
+
+      <q-card-section class="q-gutter-md">
+        <q-input v-model="naziv" label="Naziv liste" />
+        <q-input v-model="opis" label="Opis liste"/>
+        <q-checkbox v-model="isPrivate" label="Privatna lista" />
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn flat label="Odustani" v-close-popup />
+        <q-btn color="primary" label="Spremi" @click="createLista" />
+      </q-card-actions>
+
+    </q-card>
+  </q-dialog>
+
+</q-page>
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -51,16 +71,30 @@ const naziv = ref('')
 const opis = ref('')
 const isPrivate = ref(false)
 const user = ref(null)
+const lists =ref([])
+
+const fetchLists = async () => {
+  console.log("radi")
+  try {
+    const email = user.value.Email
+
+    const res = await axios.get(
+      `http://localhost:4200/lista/user/${email}`)
+
+    lists.value = res.data
+  } catch (err) {
+    console.error(err)
+  }
+}
 
 onMounted(() => {
   const storedUser = localStorage.getItem("user")
-  if (storedUser) {
-    try {
-      user.value = JSON.parse(storedUser)
-    } catch {
-      user.value = null
-    }
-  }
+
+  if (!storedUser) return
+
+  user.value = JSON.parse(storedUser)
+
+  fetchLists()
 })
 
 const createLista = async () => {
@@ -75,7 +109,7 @@ const createLista = async () => {
 
     console.log(res.data)
 
-    //nakon sta je poslano reset
+    //nakon sta je poslano, reset
     naziv.value = ''
     opis.value = ''
     isPrivate.value = false

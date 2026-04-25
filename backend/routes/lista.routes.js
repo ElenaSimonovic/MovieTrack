@@ -15,4 +15,7 @@ router.delete('/', lista.deleteList);
 // GET FILMS FROM LIST
 router.get('/lista/:id', lista.getFilmsFromList);
 
+//display list
+router.get('/user/:email', lista.getListsByUser);
+
 module.exports = router;
