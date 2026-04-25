@@ -53,7 +53,8 @@ exports.prijava = (req, res) => {
 
             res.send({
                 message: "Prijava uspješna",
-                Korisnicko_ime: user.Korisnicko_ime 
+                Korisnicko_ime: user.Korisnicko_ime,
+                Email: user.Email_korisnika
             });
             
         } else {
