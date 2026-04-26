@@ -23,7 +23,7 @@
             flat
             icon="delete"
             color="negative"
-            @click="deleteComment(c.id_komentara)"
+            @click.stop="deleteComment(c.id_komentara)"
           />
         </div>
 
@@ -74,11 +74,12 @@
 <script setup>
 import { ref, onMounted } from "vue"
 import axios from "axios"
-import { Notify } from "quasar"
+import { Notify,useQuasar } from "quasar"
 
 const selectedComment = ref(null)
 const showDialog = ref(false)
 const comments = ref([])
+const $q = useQuasar()
 
 const fetchComments = async () => {
   const res = await axios.get("http://localhost:4200/komentar")

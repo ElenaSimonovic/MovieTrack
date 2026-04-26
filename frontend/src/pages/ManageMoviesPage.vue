@@ -23,7 +23,7 @@
               <div class="text-caption text-grey">{{ film.Godina_proizvodnje }}</div>
             </div>
 
-            <q-btn flat icon="delete" color="negative" @click="deleteFilm(film.Naziv_filma)" />
+            <q-btn flat icon="delete" color="negative" @click.stop="deleteFilm(film.Naziv_filma)" />
           </div>
 
           <div class="q-mt-sm">{{ film.Opis_filma }}</div>
@@ -81,12 +81,13 @@
 <script setup>
 import { ref, onMounted } from "vue"
 import axios from "axios"
-import { Notify } from "quasar"
+import { Notify,useQuasar } from "quasar"
 
 const films = ref([])
 const showAdd = ref(false)
 const selectedFilm = ref(null)
 const showEdit = ref(false)
+const $q = useQuasar()
 
 const newFilm = ref({
   naziv: "",
