@@ -33,8 +33,9 @@ exports.remove = (req, res) => {
     dbConn.query(
         "DELETE FROM Komentar WHERE id_komentara = ?",
         [id],
-        (err) => {
+        (err,result) => {
             if (err) return res.status(500).send(err);
+            if (result.affectedRows === 0) return res.status(404).send("Komentar nije pronađen");
             res.send("Komentar obrisan");
         }
     );
@@ -47,6 +48,22 @@ exports.getAll = (req, res) => {
         (err, result) => {
             if (err) return res.status(500).send(err);
             res.send(result);
+        }
+    );
+};
+
+
+exports.update = (req, res) => {
+    const id = req.params.id;
+    const { sadrzaj, ocjena } = req.body;
+
+    dbConn.query(
+        "UPDATE Komentar SET Sadrzaj_komentara = ?, Ocjena = ?, Datum_i_vrijeme_objave = NOW() WHERE id_komentara = ?",
+        [sadrzaj, ocjena, id],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+            if (result.affectedRows === 0) return res.status(404).send("Komentar nije pronađen");
+            res.send("Komentar uspješno uređen");
         }
     );
 };

@@ -78,12 +78,6 @@ const linksList = [
     link: '/mylists'
   },
   {
-    title: 'Community',
-    caption: 'Chat with the community',
-    icon: 'chat',
-    link: '/community'
-  },
-  {
     title: 'Login',
     caption: 'Prijavi se na svoj račun',
     icon: 'login',
