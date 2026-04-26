@@ -40,9 +40,10 @@ exports.prijava = (req, res) => {
         if (lozinka === user.Lozinka) {
 
             res.send({
+                message: "Prijava uspješna",
                 email: user.Email_korisnika,
                 korisnickoIme: user.Korisnicko_ime,
-                admin: user.Admin_da_ne === 1, // 🔥 KLJUČNO
+                admin: user.Admin_da_ne === 1,
                 status: user.Status_racuna
             });
 

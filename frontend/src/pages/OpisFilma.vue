@@ -1,19 +1,19 @@
 <template>
   <q-page class="page-detail">
     <div class="content q-pa-lg">
-      
-      <q-btn 
-        flat 
+
+      <q-btn
+        flat
         no-caps
-        icon="arrow_back" 
-        label="Povratak" 
-        @click="$router.push('/pretraga-filmova')" 
-        color="secondary" 
-        class="back-btn q-mb-lg" 
+        icon="arrow_back"
+        label="Povratak"
+        @click="$router.push('/pretraga-filmova')"
+        color="secondary"
+        class="back-btn q-mb-lg"
       />
 
       <q-card v-if="movie" class="movie-detail-card shadow-24">
-        
+
         <div class="hero-section row items-center q-pa-xl q-gutter-lg">
           <div class="detail-icon-container shadow-10">
             <q-icon name="movie_filter" size="100px" color="white" />
@@ -23,11 +23,12 @@
             <div class="text-h2 text-bold text-white leading-tight">
               {{ movie.Naziv_filma }}
             </div>
+
             <div class="row q-gutter-sm q-mt-sm">
-              <q-badge 
-                v-for="g in (movie.Zanr_filma ? movie.Zanr_filma.split(',') : [])" 
-                :key="g" 
-                color="orange-10" 
+              <q-badge
+                v-for="g in (movie.Zanr_filma ? movie.Zanr_filma.split(',') : [])"
+                :key="g"
+                color="orange-10"
                 class="q-pa-sm text-subtitle2"
               >
                 {{ g.trim() }}
@@ -38,8 +39,9 @@
 
         <q-card-section class="q-pa-xl bg-white text-grey-9">
           <div class="row q-col-gutter-xl">
-            
+
             <div class="col-12 col-md-4">
+
               <div class="info-card">
                 <q-icon name="event" color="primary" size="sm" />
                 <div class="q-ml-md">
@@ -54,20 +56,23 @@
                 <q-icon name="translate" color="primary" size="sm" />
                 <div class="q-ml-md">
                   <div class="info-label">Jezik filma</div>
-                  <div class="info-value text-weight-bolder">{{ movie.Jezik_filma }}</div>
+                  <div class="info-value text-weight-bolder">
+                    {{ movie.Jezik_filma }}
+                  </div>
                 </div>
               </div>
-              
+
               <q-separator class="q-my-lg" />
-              
-              <q-btn 
-                unelevated 
-                color="primary" 
-                icon="add_circle" 
-                label="Dodaj u moju listu" 
+
+              <q-btn
+                unelevated
+                color="primary"
+                icon="add_circle"
+                label="Dodaj u moju listu"
                 class="full-width q-py-md text-weight-bold"
                 @click="addToMyList"
               />
+
             </div>
 
             <div class="col-12 col-md-8">
@@ -75,20 +80,53 @@
                 <q-icon name="notes" color="primary" size="sm" class="q-mr-sm" />
                 <div class="text-h5 text-weight-bold">Sadržaj filma</div>
               </div>
+
               <p class="movie-description">
                 {{ movie.Opis_filma }}
               </p>
             </div>
+
           </div>
         </q-card-section>
       </q-card>
 
       <div v-else class="column flex-center q-mt-xl">
         <q-spinner-dots color="primary" size="5em" />
-        <div class="text-h6 text-grey-6 q-mt-md">Učitavanje filmskih podataka...</div>
+        <div class="text-h6 text-grey-6 q-mt-md">
+          Učitavanje filmskih podataka...
+        </div>
       </div>
 
     </div>
+
+    <!-- DIALOG -->
+    <q-dialog v-model="dialog">
+      <q-card style="width:444px">
+
+        <q-card-section>
+          <div>Odaberi listu</div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-select
+            v-model="selectedList"
+            :options="lists"
+            option-label="Naziv_liste"
+            option-value="id_osobne_liste"
+            emit-value
+            map-options
+            label="Ime liste:"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Odustani" v-close-popup />
+          <q-btn color="primary" label="Dodaj" @click="confirmAddToList" />
+        </q-card-actions>
+
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -101,8 +139,20 @@ import axios from "axios";
 const route = useRoute();
 const router = useRouter();
 const $q = useQuasar();
-
+const lists = ref([])
+const selectedList = ref(null)
+const dialog = ref(false)
 const movie = ref(null);
+
+const fetchLists = async () => {
+  const user = JSON.parse(localStorage.getItem("user"))
+
+  const res = await axios.get(
+    `http://localhost:4200/lista/user/${user.Email}`
+  )
+
+  lists.value = res.data
+}
 
 // Dohvaćanje detalja filma
 const fetchMovieDetail = async () => {
@@ -144,7 +194,8 @@ const addToMyList = () => {
     });
     return; // Ovdje stajemo, ne ide se na "Uspješno!"
   }
-
+dialog.value=true
+/*
   // Ako je prošao provjeru (znači da je prijavljen):
   $q.notify({
     type: 'positive',
@@ -153,6 +204,7 @@ const addToMyList = () => {
     icon: 'check_circle',
     position: 'top'
   });
+  */
 };
 
 // Formatiranje godine
@@ -161,7 +213,34 @@ const formatYear = (dateString) => {
   return new Date(dateString).getFullYear();
 };
 
-onMounted(fetchMovieDetail);
+const confirmAddToList = async () => {
+  try {
+    await axios.post('http://localhost:4200/lista/film', {
+      id_osobne_liste: selectedList.value,
+      nazivFilma: movie.value.Naziv_filma
+    })
+
+    $q.notify({
+      type: 'positive',
+      message: 'Film dodan u listu!'
+    })
+
+    dialog.value = false
+    selectedList.value = null
+
+  } catch (err) {
+    console.error(err)
+    $q.notify({
+      type: 'negative',
+      message: 'Greška pri dodavanju filma'
+    })
+  }
+}
+
+onMounted(() => {
+  fetchMovieDetail()
+  fetchLists()
+})
 </script>
 
 <style scoped>
