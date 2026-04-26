@@ -12,7 +12,8 @@
       <q-card
         v-for="film in films"
         :key="film.Naziv_filma"
-        class="col-12 col-md-4"
+        class="col-12 col-md-4 cursor-pointer"
+        @click="openEdit(film)"
       >
         <q-card-section>
 
@@ -55,6 +56,25 @@
       </q-card>
     </q-dialog>
 
+    <q-dialog v-model="showEdit">
+      <q-card style="min-width: 400px">
+        <q-card-section class="text-h6">Uredi film</q-card-section>
+
+        <q-card-section>
+          <q-input v-model="selectedFilm.Naziv_filma" label="Naziv" />
+          <q-input v-model="selectedFilm.Godina_proizvodnje" label="Godina" />
+          <q-input v-model="selectedFilm.Opis_filma" label="Opis" />
+          <q-input v-model="selectedFilm.Zanr_filma" label="Žanr" />
+          <q-input v-model="selectedFilm.Jezik_filma" label="Jezik" />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" v-close-popup />
+          <q-btn color="primary" label="Spremi" @click="updateFilm"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -65,6 +85,8 @@ import { Notify } from "quasar"
 
 const films = ref([])
 const showAdd = ref(false)
+const selectedFilm = ref(null)
+const showEdit = ref(false)
 
 const newFilm = ref({
   naziv: "",
@@ -79,10 +101,17 @@ const fetchFilms = async () => {
   films.value = res.data
 }
 
-const deleteFilm = async (naziv) => {
-  await axios.delete(`http://localhost:4200/film/${naziv}`)
-  Notify.create({ type: "positive", message: "Film obrisan" })
-  fetchFilms()
+const deleteFilm = (naziv) => {
+  $q.dialog({
+    title: 'Potvrda',
+    message: 'Obrisati film?',
+    cancel: true,
+    persistent: true
+  }).onOk(async () => {
+    await axios.delete(`http://localhost:4200/film/${naziv}`)
+    Notify.create({ type: "positive", message: "Film obrisan" })
+    fetchFilms()
+  })
 }
 
 const addFilm = async () => {
@@ -91,6 +120,21 @@ const addFilm = async () => {
   showAdd.value = false
   fetchFilms()
 }
+
+const openEdit = (film) => {
+  selectedFilm.value = { ...film }
+  showEdit.value = true
+}
+
+const updateFilm = async () => {
+  await axios.put(`http://localhost:4200/film/${selectedFilm.value.Naziv_filma}`, selectedFilm.value)
+
+  Notify.create({ type: "positive", message: "Film ažuriran" })
+  showEdit.value = false
+  fetchFilms()
+}
+
+
 
 onMounted(fetchFilms)
 </script>

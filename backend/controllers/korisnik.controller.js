@@ -63,3 +63,14 @@ exports.obrisiKorisnika = (req, res) => {
         }
     );
 };
+
+exports.blokiraj = (req, res) => {
+    dbConn.query(
+        "UPDATE Korisnik SET Status_racuna='Blokiran' WHERE Email_korisnika=?",
+        [req.params.email],
+        (err) => {
+            if (err) return res.status(500).send(err);
+            res.send("Korisnik blokiran");
+        }
+    );
+};
