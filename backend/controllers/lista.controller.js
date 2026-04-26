@@ -16,14 +16,37 @@ exports.createList = (req, res) => {
 
 // obriši listu
 exports.deleteList = (req, res) => {
+    // Vraćamo na req.body jer je to tebi radilo prije
     const { id_osobne_liste } = req.body;
 
     dbConn.query(
-        "DELETE FROM Osobna_lista WHERE id_osobne_liste = ?",
+        "DELETE FROM Film_u_osobnoj_listi WHERE id_osobne_liste = ?",
         [id_osobne_liste],
         (err) => {
             if (err) return res.status(500).send(err);
-            res.send("Lista obrisana");
+
+            dbConn.query(
+                "DELETE FROM Osobna_lista WHERE id_osobne_liste = ?",
+                [id_osobne_liste],
+                (err) => {
+                    if (err) return res.status(500).send(err);
+                    res.send("Lista obrisana");
+                }
+            );
+        }
+    );
+};
+
+// makni film iz liste
+exports.removeFilmFromList = (req, res) => {
+    const { id_osobne_liste, nazivFilma } = req.body;
+
+    dbConn.query(
+        "DELETE FROM Film_u_osobnoj_listi WHERE id_osobne_liste=? AND Naziv_filma=?",
+        [id_osobne_liste, nazivFilma],
+        (err) => {
+            if (err) return res.status(500).send(err);
+            res.send("Film uklonjen");
         }
     );
 };
@@ -72,6 +95,26 @@ exports.getFilmsFromList = (req, res) => {
             res.send(result);
         }
     );
+};
+
+// dohvati sve javne liste od svih korisnika s korisničkim imenom autora
+exports.getAllPublicLists = (req, res) => {
+    const query = `
+        SELECT 
+            ol.*, 
+            k.Korisnicko_ime 
+        FROM Osobna_lista ol
+        JOIN Korisnik k ON ol.Email_korisnika = k.Email_korisnika
+        WHERE ol.Status_vidljivosti = 'Javna'
+    `;
+
+    dbConn.query(query, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send(err);
+        }
+        res.send(result);
+    });
 };
 
 exports.getListsByUser = (req, res) => {
