@@ -28,14 +28,25 @@ exports.create = (req, res) => {
 
 // delete komentar
 exports.remove = (req, res) => {
-    const { id_komentara } = req.body;
+    const id = req.params.id;
 
     dbConn.query(
         "DELETE FROM Komentar WHERE id_komentara = ?",
-        [id_komentara],
+        [id],
         (err) => {
             if (err) return res.status(500).send(err);
             res.send("Komentar obrisan");
+        }
+    );
+};
+
+// dohvati sve komentare po vremenu
+exports.getAll = (req, res) => {
+    dbConn.query(
+        "SELECT * FROM Komentar ORDER BY Datum_i_vrijeme_objave DESC",
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+            res.send(result);
         }
     );
 };

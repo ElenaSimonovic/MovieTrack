@@ -24,41 +24,29 @@ exports.registracija = (req, res) => {
 };
 
 exports.prijava = (req, res) => {
-    // 1. Podaci koji dolaze s frontenda (v-model="loginData.email")
-    const { email, lozinka } = req.body; 
+    const { email, lozinka } = req.body;
 
-    // 2. SQL upit s točnim nazivom stupca: Email_korisnika
     const sql = "SELECT * FROM Korisnik WHERE Email_korisnika = ?";
     
     dbConn.query(sql, [email], (err, result) => {
-        if (err) {
-            console.error("Greška u bazi:", err);
-            return res.status(500).send("Greška na serveru.");
-        }
+        if (err) return res.status(500).send("Greška na serveru.");
 
-        // Provjera je li korisnik pronađen
         if (result.length === 0) {
-            return res.status(404).send("Korisnik s tim emailom ne postoji.");
+            return res.status(404).send("Korisnik ne postoji.");
         }
 
         const user = result[0];
 
-        // 3. USPOREDBA (Pazi na velika slova!)
-        // 'lozinka' je ono što je korisnik upravo utipkao
-        // 'user.Lozinka' je ono što piše u bazi (veliko L)
         if (lozinka === user.Lozinka) {
-            
-            // Ako želiš generirati token (ako imaš instaliran jsonwebtoken)
-            // const token = jwt.sign({ id: user.id }, "tvoja_tajna", { expiresIn: '1h' });
 
             res.send({
-                message: "Prijava uspješna",
-                Korisnicko_ime: user.Korisnicko_ime 
+                email: user.Email_korisnika,
+                korisnickoIme: user.Korisnicko_ime,
+                admin: user.Admin_da_ne === 1, // 🔥 KLJUČNO
+                status: user.Status_racuna
             });
-            
+
         } else {
-            // Ako lozinka ne odgovara
-            console.log("Neuspjela prijava za email:", email);
             res.status(401).send("Pogrešna lozinka.");
         }
     });

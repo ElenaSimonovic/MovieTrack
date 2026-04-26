@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          Quasar App
+          🛡️ MovieTrack Admin panel
         </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
@@ -58,19 +58,19 @@ const linksList = [
     title: 'Manage Movies',
     caption: 'upravljanje filmovima',
     icon: 'movie',
-    link: 'manage-movies'
+    link: '/admin/manage-movies'
   },
   {
     title: 'Manage Comments',
     caption: 'upravljanje komentarima',
     icon: 'comment',
-    link: 'manage-comments'
+    link: '/admin/manage-comments'
   },
-   {
+  {
     title: 'Log out',
     caption: 'odjava iz sistema',
     icon: 'logout',
-    link: 'logout'
+    link: '/admin/logout'
   }
 ]
 
