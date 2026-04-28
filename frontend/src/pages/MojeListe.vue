@@ -158,7 +158,7 @@ const fetchData = async () => {
 
 const fetchMyLists = async () => {
   try {
-    const res = await axios.get(`http://localhost:4200/lista/user/${user.value.Email}`)
+    const res = await axios.get(`http://localhost:4200/lista/user/${user.value.email}`)
     lists.value = res.data
   } catch (err) { console.error(err) }
 }
@@ -166,7 +166,7 @@ const fetchMyLists = async () => {
 const fetchAllPublic = async () => {
   try {
     const res = await axios.get(`http://localhost:4200/lista/javne`) 
-    publicLists.value = res.data.filter(l => l.Email_korisnika !== user.value.Email)
+    publicLists.value = res.data.filter(l => l.Email_korisnika !== user.value.email)
   } catch (err) { console.error(err) }
 }
 
@@ -208,7 +208,7 @@ const createLista = async () => {
   try {
     const status = isPrivate.value ? 'Privatna' : 'Javna'
     await axios.post('http://localhost:4200/lista', {
-      email: user.value.Email,
+      email: user.value.email,
       naziv: naziv.value,
       opis: opis.value,
       status

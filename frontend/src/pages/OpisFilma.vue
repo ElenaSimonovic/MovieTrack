@@ -102,12 +102,12 @@
       <div class="row justify-between items-center">
         <div>
           <span class="text-weight-bold text-primary">{{ c.Email_korisnika }}</span>
-          <q-badge v-if="getCurrentUser()?.Email === c.Email_korisnika" color="blue-2" text-color="blue-9" class="q-ml-sm">Ti</q-badge>
+          <q-badge v-if="getCurrentUser()?.email === c.Email_korisnika" color="blue-2" text-color="blue-9" class="q-ml-sm">Ti</q-badge>
         </div>
         <div class="row items-center q-gutter-xs">
           <div class="text-caption text-grey q-mr-sm">{{ formatDate(c.Datum_i_vrijeme_objave) }}</div>
 
-          <template v-if="getCurrentUser()?.Email === c.Email_korisnika">
+          <template v-if="getCurrentUser()?.email === c.Email_korisnika">
             <q-btn flat round dense color="blue-7" icon="edit" size="sm" @click="prepareEdit(c)">
               <q-tooltip>Uredi komentar</q-tooltip>
             </q-btn>
@@ -252,7 +252,7 @@ const fetchLists = async () => {
   const user = getCurrentUser();
   if (!user) return;
   try {
-    const res = await axios.get(`http://localhost:4200/lista/user/${user.Email}`);
+    const res = await axios.get(`http://localhost:4200/lista/user/${user.email}`);
     lists.value = res.data;
   } catch (e) { console.error(e); }
 };
@@ -330,7 +330,7 @@ const submitComment = async () => {
     } else {
       // novi komentar
       await axios.post('http://localhost:4200/komentar', {
-        email: user.Email,
+        email: user.email,
         film: movie.value.Naziv_filma,
         sadrzaj: newComment.value.sadrzaj,
         ocjena: newComment.value.ocjena
