@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-pa-md" style="background-color: #f9f9f9;">
-    
+
     <div class="row items-center justify-between q-mb-lg">
       <div class="text-h4 text-weight-bold text-teal-8">Moje Liste</div>
       <q-btn
@@ -31,12 +31,12 @@
             <q-item-label caption>{{ list.Opis_liste }}</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-btn 
-              flat 
-              round 
-              color="red-4" 
-              icon="delete" 
-              @click.stop="confirmDeleteList(list)" 
+            <q-btn
+              flat
+              round
+              color="red-4"
+              icon="delete"
+              @click.stop="confirmDeleteList(list)"
             />
           </q-item-section>
         </template>
@@ -44,25 +44,25 @@
         <q-card>
           <q-card-section>
             <div class="text-subtitle2 q-mb-sm">Filmovi u listi:</div>
-            
+
             <q-list dense separator v-if="moviesInList[list.id_osobne_liste] && moviesInList[list.id_osobne_liste].length > 0">
               <q-item v-for="film in moviesInList[list.id_osobne_liste]" :key="film.Naziv_filma">
                 <q-item-section>
                   {{ film.Naziv_filma }}
                 </q-item-section>
                 <q-item-section side>
-                  <q-btn 
-                    flat 
-                    round 
-                    size="sm" 
-                    icon="close" 
-                    color="grey-7" 
+                  <q-btn
+                    flat
+                    round
+                    size="sm"
+                    icon="close"
+                    color="grey-7"
                     @click="confirmRemoveMovie(list.id_osobne_liste, film.Naziv_filma)"
                   />
                 </q-item-section>
               </q-item>
             </q-list>
-            
+
             <div v-else class="text-grey-6 q-pa-sm italic">
               Ova lista je prazna.
             </div>
@@ -131,9 +131,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import { useQuasar } from 'quasar'
+import { io } from "socket.io-client"
 
 defineOptions({ name: 'MojeListe' })
 
@@ -147,6 +148,7 @@ const user = ref(null)
 const lists = ref([])
 const publicLists = ref([])
 const moviesInList = ref({})
+const socket = io("http://localhost:4200")
 
 const fetchData = async () => {
   const storedUser = localStorage.getItem("user")
@@ -165,7 +167,7 @@ const fetchMyLists = async () => {
 
 const fetchAllPublic = async () => {
   try {
-    const res = await axios.get(`http://localhost:4200/lista/javne`) 
+    const res = await axios.get(`http://localhost:4200/lista/javne`)
     publicLists.value = res.data.filter(l => l.Email_korisnika !== user.value.email)
   } catch (err) { console.error(err) }
 }
@@ -228,7 +230,7 @@ const deleteLista = async (id) => {
     await fetchMyLists()
     await fetchAllPublic()
     $q.notify({ color: 'negative', message: 'Lista obrisana.', icon: 'delete' })
-  } catch (err) { 
+  } catch (err) {
     console.error(err)
     $q.notify({ color: 'warning', message: 'Greška pri brisanju.' })
   }
@@ -245,7 +247,26 @@ const removeMovie = async (listaId, filmNaziv) => {
   } catch (err) { console.error(err) }
 }
 
-onMounted(fetchData)
+
+const handleDbUpdate = (data) => {
+  console.log("Socket update:", data)
+
+
+  fetchMyLists()
+  fetchAllPublic()
+
+}
+
+
+
+onMounted(() => {
+  fetchData()
+  socket.on("db-update", handleDbUpdate)
+})
+
+onBeforeUnmount(() => {
+  socket.off("db-update", handleDbUpdate)
+})
 </script>
 
 <style scoped>

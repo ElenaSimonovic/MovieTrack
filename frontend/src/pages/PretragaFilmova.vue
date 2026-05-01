@@ -1,22 +1,22 @@
 <template>
   <q-page class="page">
     <div class="header-actions q-pa-md row justify-end items-center q-gutter-sm">
-      
+
       <template v-if="!user">
-        <q-btn 
-          unelevated 
-          label="Prijava" 
-          color="secondary" 
-          to="/login" 
-          no-caps 
+        <q-btn
+          unelevated
+          label="Prijava"
+          color="secondary"
+          to="/login"
+          no-caps
           class="text-weight-bold"
         />
-        <q-btn 
-          unelevated 
-          label="Registracija" 
-          color="secondary" 
-          to="/register" 
-          no-caps 
+        <q-btn
+          unelevated
+          label="Registracija"
+          color="secondary"
+          to="/register"
+          no-caps
           class="text-weight-bold"
         />
       </template>
@@ -26,25 +26,25 @@
           <div class="text-subtitle1 text-weight-bold color-text q-mr-xs">
             {{ user.Korisnicko_ime || user.korisnik }}
           </div>
-          
+
           <q-btn round flat color="secondary">
             <q-avatar size="42px">
               <q-icon name="account_circle" size="42px" />
             </q-avatar>
-            
+
             <q-menu transition-show="jump-down" transition-hide="jump-up">
               <q-list style="min-width: 150px">
-                
+
                 <q-item class="bg-grey-2 text-center">
                   <q-item-section>
                     <div class="text-weight-bold text-secondary text-h6">
-                      {{ user.Korisnicko_ime || user.korisnik }}
+                      {{ user.korisnickoIme || user.Korisnicko_ime || user.korisnik  }}
                     </div>
                   </q-item-section>
                 </q-item>
-                
+
                 <q-separator />
-                
+
                 <q-item clickable v-close-popup @click="logout" class="text-negative">
                   <q-item-section avatar>
                     <q-icon name="logout" color="negative" />
@@ -106,7 +106,7 @@
           v-for="movie in movies"
           :key="movie.Naziv_filma"
           class="movie-card shadow-2"
-          @click="$router.push('/film/' + movie.Naziv_filma)" 
+          @click="$router.push('/film/' + movie.Naziv_filma)"
           style="cursor: pointer;"
         >
           <div class="movie-icon-container">
@@ -141,7 +141,7 @@ const checkUser = () => {
   if (storedUser) {
     try {
       const parsed = JSON.parse(storedUser);
-      user.value = parsed; 
+      user.value = parsed;
     } catch (e) {
       user.value = null;
     }
@@ -196,7 +196,7 @@ onMounted(() => {
   width: 90%;
   max-width: 1200px;
   margin: auto;
-  padding-top: 80px; 
+  padding-top: 80px;
 }
 .title {
   text-align: center;
@@ -213,7 +213,7 @@ onMounted(() => {
 .search-input { width: 280px; }
 .genre-select { width: 200px; }
 .search-btn {
-  background-color: #26a69a; 
+  background-color: #26a69a;
   color: white;
   padding: 0 20px;
 }

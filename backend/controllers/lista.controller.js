@@ -9,14 +9,20 @@ exports.createList = (req, res) => {
         [naziv, email, opis, status],
         (err) => {
             if (err) return res.status(500).send(err);
+            const io = req.app.get("io");
+            io.emit("db-update", { action: "created" });
             res.send("Lista kreirana");
         }
     );
+
+    
+
 };
+
 
 // obriši listu
 exports.deleteList = (req, res) => {
-    // Vraćamo na req.body jer je to tebi radilo prije
+    
     const { id_osobne_liste } = req.body;
 
     dbConn.query(
@@ -30,11 +36,17 @@ exports.deleteList = (req, res) => {
                 [id_osobne_liste],
                 (err) => {
                     if (err) return res.status(500).send(err);
+
+                    const io = req.app.get("io");
+                    io.emit("db-update", { action: "deleted" });
                     res.send("Lista obrisana");
                 }
             );
         }
     );
+
+    
+
 };
 
 // makni film iz liste
@@ -46,9 +58,12 @@ exports.removeFilmFromList = (req, res) => {
         [id_osobne_liste, nazivFilma],
         (err) => {
             if (err) return res.status(500).send(err);
+            const io = req.app.get("io");
+            io.emit("db-update", { action: "movie-removed" });
             res.send("Film uklonjen");
         }
     );
+
 };
 
 // dodaj film u listu
@@ -60,9 +75,12 @@ exports.addFilmToList = (req, res) => {
         [id_osobne_liste, nazivFilma],
         (err) => {
             if (err) return res.status(500).send(err);
+            const io = req.app.get("io");
+            io.emit("db-update", { action: "movie-added" });
             res.send("Film dodan u listu");
         }
     );
+
 };
 
 // makni film iz liste
@@ -74,6 +92,8 @@ exports.removeFilmFromList = (req, res) => {
         [id_osobne_liste, nazivFilma],
         (err) => {
             if (err) return res.status(500).send(err);
+            const io = req.app.get("io");
+            io.emit("db-update", { action: "movie-removed" });
             res.send("Film uklonjen iz liste");
         }
     );
