@@ -108,12 +108,18 @@
           <div class="text-subtitle1">Žanrovi</div>
         </q-card-section>
 
-        <q-card-section>
-          test
-        </q-card-section>
+        <q-card-section class="q-gutter-sm">
 
+          <q-option-group
+            v-model="selectedGenres"
+            :options="genres.map(g => ({ label: g, value: g }))"
+            type="checkbox"
+          />
+
+        </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Zatvori" v-close-popup />
+          <q-btn color="primary" label="Spremi" @click="saveGenres" />
         </q-card-actions>
 
       </q-card>
@@ -138,6 +144,10 @@ const oldPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 const deletePassword = ref('')
+
+const genres = ["Akcija", "Komedija", "Drama", "SF", "Horor"]
+const selectedGenres = ref([])
+const genre_lokalno = 'invisibleGenres'
 
 const changePassword = async () => {
   if (!oldPassword.value || !newPassword.value || !confirmPassword.value) {
@@ -202,8 +212,27 @@ const deleteAccount = async () => {
   }
 }
 
+const saveGenres = () => {
+  localStorage.setItem(
+    genre_lokalno,
+    JSON.stringify(selectedGenres.value)
+  )
+
+  $q.notify({
+    type: 'positive',
+    message: 'Žanrovi spremljeni'
+  })
+
+  genreDialog.value = false
+}
+
 onMounted(() => {
   const stored = localStorage.getItem('user')
   if (stored) user.value = JSON.parse(stored)
+
+  const saved = localStorage.getItem(genre_lokalno)
+  if (saved) {
+    selectedGenres.value = JSON.parse(saved)
+  }
 })
 </script>

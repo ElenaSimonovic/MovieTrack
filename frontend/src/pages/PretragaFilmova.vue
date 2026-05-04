@@ -137,6 +137,9 @@ const selectedGenre = ref("");
 const movies = ref([]);
 const user = ref(null);
 
+const genre_lokalno = 'invisibleGenres'
+const hiddenGenres = ref([])
+
 const genres = ["Akcija", "Komedija", "Drama", "Horor", "SF"];
 
 const checkUser = () => {
@@ -168,16 +171,24 @@ const fetchMovies = async () => {
     } else {
       res = await axios.get(API_URL);
     }
-    movies.value = res.data;
+    // filmovi sa zanrovima koje korisnik ne voli se nebum prikazivali
+    const hidden = JSON.parse(localStorage.getItem(genre_lokalno) || '[]')
+    movies.value = res.data.filter(movie => {
+    return !hidden.some(g => movie.Zanr_filma?.includes(g))
+})
   } catch (err) {
     console.error("Greška:", err);
   }
 };
 
 onMounted(() => {
-  fetchMovies();
-  checkUser();
-});
+  fetchMovies()
+  checkUser()
+  const saved = localStorage.getItem(genre_lokalno)
+  if (saved) {
+    hiddenGenres.value = JSON.parse(saved)
+  }
+})
 </script>
 
 <style scoped>
