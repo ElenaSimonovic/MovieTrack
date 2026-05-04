@@ -32,6 +32,7 @@
           </q-item-section>
           <q-item-section side>
             <q-btn
+            v-if="list.Naziv_liste !== 'Favoriti' && list.Naziv_liste !== 'Želim gledati'"
               flat
               round
               color="red-4"
