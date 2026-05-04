@@ -6,5 +6,6 @@ router.post('/registracija', korisnikController.registracija);
 router.post('/prijava', korisnikController.prijava);
 router.delete('/:email', korisnikController.obrisiKorisnika);
 router.put('/blokiraj/:email', korisnikController.blokiraj);
+router.post('/password', korisnikController.changePassword);
 
 module.exports = router;

@@ -51,6 +51,9 @@
                   </q-item-section>
                   <q-item-section>Odjava</q-item-section>
                 </q-item>
+                <q-item clickable @click="$router.push('/korisnik')">
+                  <q-item-section>Pregled</q-item-section>
+                </q-item>
               </q-list>
             </q-menu>
           </q-btn>

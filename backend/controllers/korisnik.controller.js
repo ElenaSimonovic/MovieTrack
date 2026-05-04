@@ -94,3 +94,34 @@ exports.blokiraj = (req, res) => {
         }
     );
 };
+
+exports.changePassword = (req, res) => {
+    const { email, oldPassword, newPassword } = req.body;
+
+    dbConn.query(
+        "SELECT Lozinka FROM Korisnik WHERE Email_korisnika=?",
+        [email],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+
+            if (result.length === 0) {
+                return res.status(404).send("Korisnik ne postoji");
+            }
+
+            const user = result[0];
+
+            if (oldPassword !== user.Lozinka) {
+                return res.status(401).send("Stara lozinka je kriva");
+            }
+
+            dbConn.query(
+                "UPDATE Korisnik SET Lozinka=? WHERE Email_korisnika=?",
+                [newPassword, email],
+                (err) => {
+                    if (err) return res.status(500).send(err);
+                    res.send("Lozinka promijenjena");
+                }
+            );
+        }
+    );
+};

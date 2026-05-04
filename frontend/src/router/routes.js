@@ -8,7 +8,8 @@ const routes = [
       { path: 'login', component: () => import('pages/LoginPage.vue') },
       { path: 'register', component: () => import('pages/RegistracijaPage.vue') },
       { path: 'mylists', component: () => import('pages/MojeListe.vue') },
-      { path: 'film/:naziv', name: 'OpisFilma', component: () => import('pages/OpisFilma.vue') }
+      { path: 'film/:naziv', name: 'OpisFilma', component: () => import('pages/OpisFilma.vue') },
+      { path: 'korisnik', component: () => import('pages/KorisnikPage.vue') }
     ]
   },
 
