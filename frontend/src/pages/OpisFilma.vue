@@ -77,6 +77,27 @@
                 class="full-width q-py-md text-weight-bold"
                 @click="openCommentDialog"
               />
+              <div class="row q-gutter-sm q-mb-md">
+              <q-btn
+                flat
+                round
+                icon="favorite"
+                color="red"
+                @click="addToSpecialList('Favoriti')"
+              >
+                <q-tooltip>Dodaj u Favorite</q-tooltip>
+              </q-btn>
+
+              <q-btn
+                flat
+                round
+                icon="schedule"
+                color="blue"
+                @click="addToSpecialList('Želim gledati')"
+              >
+                <q-tooltip>Dodaj u Želim gledati</q-tooltip>
+              </q-btn>
+            </div>
             </div>
 
             <div class="col-12 col-md-8">
@@ -284,7 +305,43 @@ const addToMyList = () => {
   dialog.value = true;
 };
 
+// funckija za dodavanje u favorite i gledaj kasnije liste
+const addToSpecialList = async (nazivListe) => {
+  const user = getCurrentUser();
+  if (!user) {
+    showLoginNotify();
+    return;
+  }
 
+  try {
+    const lista = lists.value.find(l => l.Naziv_liste === nazivListe);
+
+    if (!lista) {
+      $q.notify({
+        type: 'negative',
+        message: `Lista nije pronađena`
+      });
+      return;
+    }
+
+    await axios.post('http://localhost:4200/lista/film', {
+      id_osobne_liste: lista.id_osobne_liste,
+      nazivFilma: movie.value.Naziv_filma
+    });
+
+    $q.notify({
+      type: 'positive',
+      message: `dodano u "${nazivListe}"`,
+    });
+
+  } catch (err) {
+    console.error(err);
+    $q.notify({
+      type: 'negative',
+      message: 'greška pri dodavanju.'
+    });
+  }
+};
 
 // Funkcija za otvaranje dijaloga za NOVI komentar
 const openCommentDialog = () => {
