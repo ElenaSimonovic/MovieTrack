@@ -16,9 +16,29 @@ exports.registracija = (req, res) => {
         [email, lozinka, korisnickoIme, datumRodjenja],
         (err) => {
             if (err) {
-                return res.status(500).send("Greška baze: " + err.sqlMessage);
+                return res.status(500).send("greška" + err.sqlMessage);
             }
-            res.send("Registracija OK");
+
+            const sqlLista = `
+                INSERT INTO Osobna_lista 
+                (Naziv_liste, Email_korisnika, Opis_liste, Status_vidljivosti) 
+                VALUES (?, ?, ?, ?)
+            `;
+
+            const defaultLists = [
+                ["Želim gledati", email, "Filmovi koje želim gledati", "Privatna"],
+                ["Favoriti", email, "Omiljeni filmovi", "Privatna"]
+            ];
+
+            dbConn.query(sqlLista, defaultLists[0], (err) => {
+                if (err) return res.status(500).send(err);
+
+                dbConn.query(sqlLista, defaultLists[1], (err) => {
+                    if (err) return res.status(500).send(err);
+
+                    res.send("Registracija OK");
+                });
+            });
         }
     );
 };
