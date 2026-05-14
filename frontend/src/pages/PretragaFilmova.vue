@@ -3,24 +3,76 @@
     <div class="header-actions q-pa-md row justify-end items-center q-gutter-sm">
 
       <template v-if="!user">
-        <q-btn
-          unelevated
-          label="Prijava"
-          color="secondary"
-          to="/login"
-          no-caps
-          class="text-weight-bold"
-        />
-        <q-btn
-          unelevated
-          label="Registracija"
-          color="secondary"
-          to="/register"
-          no-caps
-          class="text-weight-bold"
-        />
-      </template>
 
+  <div class="column items-center q-gutter-md">
+
+    <q-btn
+      unelevated
+      icon="movie"
+      label="Pogledaj help video"
+      color="dark"
+      no-caps
+      size="lg"
+      class="text-weight-bold"
+      @click="showVideo = true"
+    />
+
+    <div class="row q-gutter-md">
+
+      <q-btn
+        unelevated
+        label="Prijava"
+        color="secondary"
+        to="/login"
+        no-caps
+        class="text-weight-bold"
+      />
+
+      <q-btn
+        unelevated
+        label="Registracija"
+        color="secondary"
+        to="/register"
+        no-caps
+        class="text-weight-bold"
+      />
+
+    </div>
+  </div>
+
+  <!-- VIDEO MODAL -->
+  <q-dialog v-model="showVideo">
+
+  <q-card class="video-modal">
+
+    <div class="video-header row items-center justify-between">
+      <div class="text-h6 text-weight-bold text-white">
+        MovieTrack Help
+      </div>
+
+      <q-btn
+        flat
+        round
+        dense
+        icon="close"
+        color="white"
+        v-close-popup
+      />
+    </div>
+
+    <video
+      class="movie-video"
+      controls
+      autoplay
+    >
+      <source :src="videoSrc" type="video/mp4" />
+    </video>
+
+  </q-card>
+
+</q-dialog>
+
+</template>
       <template v-else>
         <div class="row items-center q-gutter-sm cursor-pointer">
           <div class="text-subtitle1 text-weight-bold color-text q-mr-xs">
@@ -130,6 +182,9 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import videoSrc from 'src/assets/video/MovieTrack-help.mp4'
+
+const showVideo = ref(false)
 
 const router = useRouter();
 const search = ref("");
@@ -259,5 +314,28 @@ onMounted(() => {
 .movie-title {
   font-size: 1.1rem;
   color: #333;
+}
+
+
+.video-modal {
+  width: 90vw;
+  max-width: 1100px;
+  background: #121212;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+.video-header {
+  padding: 16px 20px;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(10px);
+}
+
+.movie-video {
+  width: 100%;
+  aspect-ratio: 16/9;
+  display: block;
+  background: black;
 }
 </style>
