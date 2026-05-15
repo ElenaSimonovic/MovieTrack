@@ -108,44 +108,60 @@
       </h5>
 
       <div class="search-bar">
-        <div class="genre-select q-px-md">
-          <div :class="$q.dark.isActive ? 'text-white' : 'text-grey-8'" class="text-caption">Raspon godina</div>
-          <q-range
-            v-model="yearRange"
-            :min="1900"
-            :max="new Date().getFullYear()"
-            label
-            label-always
-            color="secondary"
-            :dark="$q.dark.isActive"
-            @update:model-value="fetchMovies"
-          />
-        </div>
 
-        <q-select
-          filled
-          v-model="selectedGenre"
-          :options="genres"
-          label="Žanr"
-          clearable
-          class="genre-select"
-          @update:model-value="fetchMovies"
-          color="secondary"
-          :dark="$q.dark.isActive"
-        >
-          <template v-slot:prepend>
-            <q-icon name="category" />
-          </template>
-        </q-select>
+  <q-input
+    filled
+    v-model="search"
+    placeholder="Pretraži film..."
+    class="search-input"
+    @keyup.enter="fetchMovies"
+    color="secondary"
+  >
+    <template v-slot:prepend>
+      <q-icon name="search" />
+    </template>
+  </q-input>
 
-        <q-btn
-          label="Pretraži"
-          icon="search"
-          @click="fetchMovies"
-          class="search-btn text-weight-bold"
-          unelevated
-        />
-      </div>
+  <div class="column items-start">
+    <div class="text-subtitle2 text-grey-8 q-mb-xs">
+      Godina izlaska
+    </div>
+
+    <q-range
+      v-model="yearRange"
+      :min="1900"
+      :max="new Date().getFullYear()"
+      label
+      label-always
+      color="secondary"
+      class="genre-select"
+      @update:model-value="fetchMovies"
+    />
+  </div>
+
+  <q-select
+    filled
+    v-model="selectedGenre"
+    :options="genres"
+    label="Žanr"
+    clearable
+    class="genre-select"
+    @update:model-value="fetchMovies"
+    color="secondary"
+  >
+    <template v-slot:prepend>
+      <q-icon name="category" />
+    </template>
+  </q-select>
+
+  <q-btn
+    label="Pretraži"
+    icon="search"
+    @click="fetchMovies"
+    class="search-btn text-weight-bold"
+    unelevated
+  />
+</div>
 
       <div class="movies-grid">
         <q-card
@@ -238,8 +254,28 @@ const fetchMovies = async () => {
       res = await axios.get(API_URL);
     }
 
+    let filteredMovies = res.data;
+
+    if (search.value) {
+      filteredMovies = filteredMovies.filter(movie => {
+        const year = new Date(movie.Godina_proizvodnje).getFullYear();
+
+        const matchesYear =
+          year >= yearRange.value.min &&
+          year <= yearRange.value.max;
+
+        const matchesGenre =
+          !selectedGenre.value ||
+          movie.Zanr_filma?.includes(selectedGenre.value);
+
+        return matchesYear && matchesGenre;
+      });
+    }
+
+    // filmovi sa zanrovima koje korisnik ne voli se nebum prikazivali
     const hidden = JSON.parse(localStorage.getItem(genre_lokalno) || '[]');
-    movies.value = res.data.filter(movie => {
+
+    movies.value = filteredMovies.filter(movie => {
       return !hidden.some(g => movie.Zanr_filma?.includes(g));
     });
 
