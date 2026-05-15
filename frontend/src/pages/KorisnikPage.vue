@@ -27,6 +27,14 @@
       <div class="q-gutter-sm">
 
         <q-btn
+          :color="$q.dark.isActive ? 'grey-9' : 'black'"
+          :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
+          :label="$q.dark.isActive ? 'Prebaci na svijetlu temu' : 'Prebaci na tamnu temu'"
+          class="full-width"
+          @click="toggleTheme"
+        />
+
+        <q-btn
           color="primary"
           icon="lock"
           label="Promijeni lozinku"
@@ -149,6 +157,11 @@ const genres = ["Akcija", "Komedija", "Drama", "SF", "Horor"]
 const selectedGenres = ref([])
 const genre_lokalno = 'invisibleGenres'
 
+const toggleTheme = () => {
+  $q.dark.toggle()
+  localStorage.setItem('darkMode', $q.dark.isActive)
+}
+
 const changePassword = async () => {
   if (!oldPassword.value || !newPassword.value || !confirmPassword.value) {
     $q.notify({ type: 'warning', message: 'neko polje je prazno' })
@@ -227,6 +240,9 @@ const saveGenres = () => {
 }
 
 onMounted(() => {
+  const isDark = localStorage.getItem('darkMode') === 'true'
+  $q.dark.set(isDark)
+
   const stored = localStorage.getItem('user')
   if (stored) user.value = JSON.parse(stored)
 

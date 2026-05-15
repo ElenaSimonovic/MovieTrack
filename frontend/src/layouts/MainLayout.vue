@@ -1,6 +1,9 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated class="bg-primary text-white">
+    <q-header 
+      elevated 
+      :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-primary text-white'"
+    >
       <q-toolbar>
         <q-btn
           flat
@@ -24,9 +27,8 @@
 
     <q-drawer
       v-model="leftDrawerOpen"
-
       bordered
-      class="bg-grey-1"
+      :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-1'"
     >
       <q-list>
         <q-item-label header>
@@ -59,10 +61,13 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useQuasar } from 'quasar' // Ovo je važno za Dark mod
 
 defineOptions({
   name: 'MainLayout'
 })
+
+const $q = useQuasar() // Inicijalizacija Quasara
 
 const linksList = [
   {
@@ -99,7 +104,7 @@ function toggleLeftDrawer () {
 </script>
 
 <style scoped>
-/* Dodatni stil za naslov da izgleda profesionalnije */
+/* Tvoj originalni stil za naslov */
 .q-toolbar-title {
   font-weight: bold;
   letter-spacing: 1px;

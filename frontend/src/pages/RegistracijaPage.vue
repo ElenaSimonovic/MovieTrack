@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center page-register">
+  <q-page class="flex flex-center page-register" :class="$q.dark.isActive ? 'bg-dark' : ''">
     <q-card style="width: 500px; border-radius: 20px;" class="shadow-24 q-my-lg">
       
       <q-card-section class="bg-secondary text-white text-center q-pa-xl">
@@ -8,21 +8,22 @@
         <div class="text-subtitle1 q-mt-sm">Postanite član naše zajednice</div>
       </q-card-section>
 
-      <q-card-section class="q-pa-xl bg-white">
+      <q-card-section class="q-pa-xl" :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-white'">
         <q-form @submit="handleRegister" class="q-gutter-md">
-          <q-input filled v-model="regData.korisnickoIme" label="Korisničko ime" color="secondary" required>
+          
+          <q-input filled v-model="regData.korisnickoIme" label="Korisničko ime" color="secondary" required :dark="$q.dark.isActive">
             <template v-slot:prepend><q-icon name="person" color="secondary" /></template>
           </q-input>
 
-          <q-input filled v-model="regData.email" label="Email adresa" type="email" color="secondary" required>
+          <q-input filled v-model="regData.email" label="Email adresa" type="email" color="secondary" required :dark="$q.dark.isActive">
             <template v-slot:prepend><q-icon name="alternate_email" color="secondary" /></template>
           </q-input>
 
-          <q-input filled v-model="regData.lozinka" label="Lozinka" type="password" color="secondary" required>
+          <q-input filled v-model="regData.lozinka" label="Lozinka" type="password" color="secondary" required :dark="$q.dark.isActive">
             <template v-slot:prepend><q-icon name="vpn_key" color="secondary" /></template>
           </q-input>
 
-          <q-input filled v-model="regData.datumRodjenja" label="Datum rođenja" type="date" stack-label color="secondary" required>
+          <q-input filled v-model="regData.datumRodjenja" label="Datum rođenja" type="date" stack-label color="secondary" required :dark="$q.dark.isActive">
             <template v-slot:prepend><q-icon name="cake" color="secondary" /></template>
           </q-input>
 
@@ -40,8 +41,8 @@
         </q-form>
       </q-card-section>
 
-      <q-card-section class="text-center q-pb-xl bg-white">
-        <div class="text-grey-7 text-subtitle1">
+      <q-card-section class="text-center q-pb-xl" :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-white'">
+        <div :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey-7'" class="text-subtitle1">
           Već imate račun? 
           <q-btn flat label="Prijavi se" color="secondary" to="/login" dense no-caps class="text-bold" />
         </div>
@@ -68,12 +69,8 @@ const regData = ref({
 
 const handleRegister = async () => {
   try {
-    // VAŽNO: Ovaj URL mora odgovarati tvom index.js i routes na BACKENDU.
-    // Budući da si u index.js stavila app.use('/korisnik', ...), 
-    // a u routes router.post('/registracija', ...), onda je URL:
     const response = await axios.post('http://localhost:4200/korisnik/registracija', regData.value)
     
-    // Provjeravamo je li server uopće vratio išta (ako je prošlo, ide u try)
     $q.notify({ 
       type: 'positive', 
       message: 'Uspješna registracija!', 
@@ -82,7 +79,6 @@ const handleRegister = async () => {
       timeout: 3000
     })
 
-    // Pražnjenje polja
     regData.value = {
       korisnickoIme: '',
       email: '',
@@ -90,15 +86,12 @@ const handleRegister = async () => {
       datumRodjenja: ''
     }
 
-    // Prebacivanje na login. Ovdje koristiš ime ili putanju iz VUE ruta (obično '/login')
     setTimeout(() => {
       router.push('/login')
     }, 1500)
 
   } catch (err) {
     console.error("Detalji greške:", err.response);
-    
-    // Ovo će ti ispisati točan razlog (npr. "Greška baze: Unknown column...")
     const serverMessage = err.response?.data || 'Provjerite vezu sa serverom.';
     
     $q.notify({ 
@@ -110,3 +103,15 @@ const handleRegister = async () => {
   }
 }
 </script>
+
+<style scoped>
+.page-register {
+  /* Svijetli gradient za običnu temu */
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* Prisilna tamna pozadina kad je uključen tamni mod */
+:deep(.body--dark) .page-register {
+  background: #121212 !important;
+}
+</style>
