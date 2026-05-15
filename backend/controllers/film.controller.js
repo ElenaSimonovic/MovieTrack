@@ -61,18 +61,27 @@ exports.remove = (req, res) => {
 };
 
 // filter filmova
+// filter filmova
 exports.filter = (req, res) => {
-    const { zanr } = req.query;
+    const { zanr, godinaOd, godinaDo } = req.query;
 
-    // Koristimo LIKE i postotke (%) da pronađemo žanr bilo gdje u tekstu
-    dbConn.query(
-        "SELECT * FROM Film WHERE Zanr_filma LIKE ?", 
-        [`%${zanr}%`], // Ovo će tražiti npr. "Akcija" unutar "Akcija, SF"
-        (err, result) => {
-            if (err) return res.status(500).send(err);
-            res.send(result);
-        }
-    );
+    let query = "SELECT * FROM Film WHERE 1=1";
+    const params = [];
+
+    if (zanr) {
+        query += " AND Zanr_filma LIKE ?";
+        params.push(`%${zanr}%`); // Ovo će tražiti npr. "Akcija" unutar "Akcija, SF"
+    }
+
+    if (godinaOd && godinaDo) {
+        query += " AND YEAR(Godina_proizvodnje) BETWEEN ? AND ?";
+        params.push(godinaOd, godinaDo);
+    }
+
+    dbConn.query(query, params, (err, result) => {
+        if (err) return res.status(500).send(err);
+        res.send(result);
+    });
 };
 
 exports.search = (req, res) => {

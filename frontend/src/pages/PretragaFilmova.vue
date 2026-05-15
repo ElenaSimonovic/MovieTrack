@@ -119,18 +119,16 @@
       </h5>
 
       <div class="search-bar">
-        <q-input
-          filled
-          v-model="search"
-          placeholder="Pretraži film..."
-          class="search-input"
-          @keyup.enter="fetchMovies"
+        <q-range
+          v-model="yearRange"
+          :min="1900"
+          :max="new Date().getFullYear()"
+          label
+          label-always
           color="secondary"
-        >
-          <template v-slot:prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
+          class="genre-select"
+          @update:model-value="fetchMovies"
+        />
 
         <q-select
           filled
@@ -197,6 +195,12 @@ const hiddenGenres = ref([])
 
 const genres = ["Akcija", "Komedija", "Drama", "Horor", "SF"];
 
+const yearRange = ref({
+  // min i max ne u samom slideru, vec koje su dozvoljene granice izbora
+    min: 1900,
+    max: 2100
+});
+
 const checkUser = () => {
   const storedUser = localStorage.getItem("user");
   if (storedUser) {
@@ -219,18 +223,32 @@ const fetchMovies = async () => {
   try {
     const API_URL = "http://localhost:4200/film";
     let res;
+
     if (search.value) {
-      res = await axios.get(`${API_URL}/search`, { params: { query: search.value } });
-    } else if (selectedGenre.value) {
-      res = await axios.get(`${API_URL}/filter`, { params: { zanr: selectedGenre.value } });
+      res = await axios.get(`${API_URL}/search`, {
+        params: { query: search.value }
+      });
+
+    } else if (selectedGenre.value || yearRange.value) {
+      res = await axios.get(`${API_URL}/filter`, {
+        params: {
+          zanr: selectedGenre.value || undefined,
+          godinaOd: yearRange.value?.min,
+          godinaDo: yearRange.value?.max
+        }
+      });
+
     } else {
       res = await axios.get(API_URL);
     }
+
     // filmovi sa zanrovima koje korisnik ne voli se nebum prikazivali
-    const hidden = JSON.parse(localStorage.getItem(genre_lokalno) || '[]')
+    const hidden = JSON.parse(localStorage.getItem(genre_lokalno) || '[]');
+
     movies.value = res.data.filter(movie => {
-    return !hidden.some(g => movie.Zanr_filma?.includes(g))
-})
+      return !hidden.some(g => movie.Zanr_filma?.includes(g));
+    });
+
   } catch (err) {
     console.error("Greška:", err);
   }
