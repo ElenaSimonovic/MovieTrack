@@ -86,7 +86,7 @@
                   </q-item-section>
                   <q-item-section>Odjava</q-item-section>
                 </q-item>
-                
+
                 <q-item clickable @click="$router.push('/korisnik')" :dark="$q.dark.isActive">
                   <q-item-section :class="$q.dark.isActive ? 'text-white' : ''">Pregled</q-item-section>
                 </q-item>
@@ -99,9 +99,9 @@
 
     <div class="content">
       <h5 class="title">
-        <img 
-          style="height: 275px; width: auto;" 
-          src="../assets/logo.png" 
+        <img
+          style="height: 275px; width: auto;"
+          src="../assets/logo.png"
           alt="logo"
           :style="$q.dark.isActive ? 'filter: brightness(1.2);' : ''"
         >
@@ -160,6 +160,18 @@
     @click="fetchMovies"
     class="search-btn text-weight-bold"
     unelevated
+  />
+</div>
+
+<div class="row justify-center q-mb-lg">
+  <q-btn
+    icon="event"
+    label="Preuzmi premijere za kalendar"
+    color="secondary"
+    unelevated
+    no-caps
+    class="text-weight-bold"
+    @click="exportUpcomingMovies"
   />
 </div>
 
@@ -292,6 +304,90 @@ onMounted(() => {
     hiddenGenres.value = JSON.parse(saved)
   }
 })
+
+
+const exportUpcomingMovies = () => {
+
+  const today = new Date()
+
+  // samo budući filmovi
+  const upcomingMovies = movies.value.filter(movie => {
+    return new Date(movie.Godina_proizvodnje) > today
+  })
+
+  if (!upcomingMovies.length) {
+    $q.notify({
+      type: 'warning',
+      message: 'Nema nadolazećih premijera'
+    })
+    return
+  }
+
+  let icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+CALSCALE:GREGORIAN
+`
+
+  upcomingMovies.forEach(movie => {
+
+    const date = new Date(movie.Godina_proizvodnje)
+
+    const formattedDate =
+      date.getFullYear().toString() +
+      String(date.getMonth() + 1).padStart(2, '0') +
+      String(date.getDate()).padStart(2, '0')
+
+    const endDate = new Date(date)
+endDate.setDate(endDate.getDate() + 1)
+
+const nextDay =
+  endDate.getFullYear().toString() +
+  String(endDate.getMonth() + 1).padStart(2, '0') +
+  String(endDate.getDate()).padStart(2, '0')
+
+const timestamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+
+icsContent += `
+BEGIN:VEVENT
+UID:${movie.Naziv_filma}-${formattedDate}@movietrack
+DTSTAMP:${timestamp}
+SUMMARY:${movie.Naziv_filma}
+DESCRIPTION:${movie.Opis_filma || 'Filmska premijera'}
+DTSTART;VALUE=DATE:${formattedDate}
+DTEND;VALUE=DATE:${nextDay}
+
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Reminder
+END:VALARM
+
+END:VEVENT
+`
+  })
+
+  icsContent += `
+END:VCALENDAR
+`
+
+  const blob = new Blob([icsContent], {
+    type: 'text/calendar;charset=utf-8'
+  })
+
+  const link = document.createElement('a')
+
+  link.href = URL.createObjectURL(blob)
+  link.download = 'premijere.ics'
+
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  $q.notify({
+    type: 'positive',
+    message: 'ICS datoteka kreirana'
+  })
+}
 </script>
 
 <style scoped>
