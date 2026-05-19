@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header 
-      elevated 
+    <q-header
+      elevated
       :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-primary text-white'"
     >
       <q-toolbar>
@@ -21,7 +21,7 @@
           MovieTrack
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div>Tvoja zbirka filmova</div>
       </q-toolbar>
     </q-header>
 
