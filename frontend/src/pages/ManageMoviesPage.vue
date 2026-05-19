@@ -43,7 +43,7 @@
 
         <q-card-section>
           <q-input v-model="newFilm.naziv" label="Naziv" />
-          <q-input v-model="newFilm.godina" label="Godina" />
+          <q-input v-model="newFilm.godina" label="Godina (YYYY-MM-DD)" />
           <q-input v-model="newFilm.opis" label="Opis" />
           <q-input v-model="newFilm.zanr" label="Žanr" />
           <q-input v-model="newFilm.jezik" label="Jezik" />
@@ -82,7 +82,11 @@
 import { ref, onMounted } from "vue"
 import axios from "axios"
 import { Notify,useQuasar } from "quasar"
+import { useRouter } from "vue-router"
+import { api } from "boot/axios";
 
+
+const router = useRouter()
 const films = ref([])
 const showAdd = ref(false)
 const selectedFilm = ref(null)
@@ -109,14 +113,14 @@ const deleteFilm = (naziv) => {
     cancel: true,
     persistent: true
   }).onOk(async () => {
-    await axios.delete(`http://localhost:4200/film/${naziv}`)
+    await api.delete(`http://localhost:4200/film/${naziv}`)
     Notify.create({ type: "positive", message: "Film obrisan" })
     fetchFilms()
   })
 }
 
 const addFilm = async () => {
-  await axios.post("http://localhost:4200/film", newFilm.value)
+  await api.post("http://localhost:4200/film", newFilm.value)
   Notify.create({ type: "positive", message: "Film dodan" })
   showAdd.value = false
   fetchFilms()
@@ -128,7 +132,7 @@ const openEdit = (film) => {
 }
 
 const updateFilm = async () => {
-  await axios.put(`http://localhost:4200/film/${selectedFilm.value.Naziv_filma}`, selectedFilm.value)
+  await api.put(`http://localhost:4200/film/${selectedFilm.value.Naziv_filma}`, selectedFilm.value)
 
   Notify.create({ type: "positive", message: "Film ažuriran" })
   showEdit.value = false
@@ -137,5 +141,27 @@ const updateFilm = async () => {
 
 
 
-onMounted(fetchFilms)
+onMounted(() => {
+  const storedUser = localStorage.getItem("user")
+  const token = localStorage.getItem("token")
+
+  if (!storedUser || !token) {
+    router.push("/login")
+    return
+  }
+
+  const parsed = JSON.parse(storedUser)
+
+  // samo admin smije ovdje
+  if (!parsed.admin) {
+    $q.notify({
+      type: "negative",
+      message: "Nemaš pristup admin panelu"
+    })
+    router.push("/")
+    return
+  }
+
+  fetchFilms()
+})
 </script>

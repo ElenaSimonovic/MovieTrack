@@ -15,9 +15,17 @@ const routes = [
 
   {
     path: '/admin',
-    component: () => import('layouts/AdminLayout.vue'),
-    meta: { requiresAuth: true, admin: true },
-    children: [
+      component: () => import('layouts/AdminLayout.vue'),
+      beforeEnter: (to, from, next) => {
+        const user = JSON.parse(localStorage.getItem("user"))
+
+        if (!user || !user.admin) {
+          return next('/')
+        }
+
+        next()
+      },
+      children: [
       { path: '', name: 'admin-dashboard', component: () => import('pages/AdminIndexPage.vue') },
       { path: 'manage-movies', name: 'manage-movies', component: () => import('pages/ManageMoviesPage.vue') },
       { path: 'manage-comments', name: 'manage-comments', component: () => import('pages/ManageCommentsPage.vue') },

@@ -241,6 +241,7 @@ const checkUser = () => {
 
 const logout = () => {
   localStorage.removeItem("user");
+  localStorage.removeItem("token");
   user.value = null;
   router.push("/login");
 };

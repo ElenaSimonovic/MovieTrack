@@ -75,15 +75,25 @@
 import { ref, onMounted } from "vue"
 import axios from "axios"
 import { Notify,useQuasar } from "quasar"
+import { api } from "boot/axios";
+
 
 const selectedComment = ref(null)
 const showDialog = ref(false)
 const comments = ref([])
 const $q = useQuasar()
+const loadingDelete = ref(false)
 
 const fetchComments = async () => {
-  const res = await axios.get("http://localhost:4200/komentar")
-  comments.value = res.data
+  try {
+    const res = await axios.get("http://localhost:4200/komentar")
+    comments.value = res.data
+  } catch (err) {
+    $q.notify({
+      type: 'negative',
+      message: 'Greška pri dohvaćanju komentara'
+    })
+  }
 }
 
 const deleteComment = (id) => {
@@ -93,9 +103,16 @@ const deleteComment = (id) => {
     cancel: true,
     persistent: true
   }).onOk(async () => {
-    await axios.delete(`http://localhost:4200/komentar/${id}`)
-    Notify.create({ type: "positive", message: "Komentar obrisan" })
-    fetchComments()
+    loadingDelete.value = true
+    try {
+      await api.delete(`http://localhost:4200/komentar/${id}`)
+      Notify.create({ type: "positive", message: "Komentar obrisan" })
+      fetchComments()
+    } catch (err) {
+      Notify.create({ type: "negative", message: "Greška pri brisanju" })
+    } finally {
+      loadingDelete.value = false
+    }
   })
 }
 
@@ -105,17 +122,40 @@ const openComment = (c) => {
 }
 
 const blockUser = async () => {
-  await axios.put(`http://localhost:4200/korisnik/blokiraj/${selectedComment.value.Email_korisnika}`)
+  if (!selectedComment.value) return
 
-  Notify.create({
-    type: "warning",
-    message: "Korisnik blokiran"
-  })
+  try {
+    await api.put(`http://localhost:4200/korisnik/blokiraj/${selectedComment.value.Email_korisnika}`)
 
-  showDialog.value = false
+    Notify.create({
+      type: "warning",
+      message: "Korisnik blokiran"
+    })
+
+    showDialog.value = false
+
+  } catch (err) {
+    Notify.create({
+      type: "negative",
+      message: "Greška pri blokiranju"
+    })
+  }
 }
 
 
 
-onMounted(fetchComments)
+onMounted(() => {
+  const user = JSON.parse(localStorage.getItem("user"))
+
+  if (!user || !user.admin) {
+    $q.notify({
+      type: 'negative',
+      message: 'Nemaš pristup'
+    })
+    window.location.href = '/'
+    return
+  }
+
+  fetchComments()
+})
 </script>

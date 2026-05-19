@@ -29,15 +29,29 @@
 <script setup>
 import { ref, onMounted } from "vue"
 import axios from "axios"
+import { api } from "boot/axios";
+
 
 const filmsCount = ref(0)
 const commentsCount = ref(0)
 
 onMounted(async () => {
-  const films = await axios.get("http://localhost:4200/film")
-  const comments = await axios.get("http://localhost:4200/komentar")
+  const user = JSON.parse(localStorage.getItem("user"))
 
-  filmsCount.value = films.data.length
-  commentsCount.value = comments.data.length
+  if (!user || !user.admin) {
+    window.location.href = "/"
+    return
+  }
+
+  try {
+    const films = await axios.get("http://localhost:4200/film")
+    const comments = await axios.get("http://localhost:4200/komentar")
+
+    filmsCount.value = films.data.length
+    commentsCount.value = comments.data.length
+
+  } catch (err) {
+    console.error(err)
+  }
 })
 </script>

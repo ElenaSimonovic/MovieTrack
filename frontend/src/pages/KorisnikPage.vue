@@ -140,9 +140,14 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
+import { api } from "boot/axios";
+
 
 const $q = useQuasar()
 const user = ref(null)
+const token = ref(null)
+const router = useRouter()
 
 const passwordDialog = ref(false)
 const deleteDialog = ref(false)
@@ -174,7 +179,7 @@ const changePassword = async () => {
   }
 
   try {
-    await axios.post('http://localhost:4200/korisnik/password', {
+    await api.post('http://localhost:4200/korisnik/password', {
       email: user.value.email,
       oldPassword: oldPassword.value,
       newPassword: newPassword.value
@@ -202,7 +207,7 @@ const deleteAccount = async () => {
   }
 
   try {
-    await axios.delete(`http://localhost:4200/korisnik/${user.value.email}`, {
+    await api.delete(`http://localhost:4200/korisnik/${user.value.email}`, {
       data: {
         password: deletePassword.value
       }
@@ -245,6 +250,11 @@ onMounted(() => {
 
   const stored = localStorage.getItem('user')
   if (stored) user.value = JSON.parse(stored)
+
+  token.value = localStorage.getItem('token')
+  if (!token.value) {
+    router.push('/login')
+  }
 
   const saved = localStorage.getItem(genre_lokalno)
   if (saved) {

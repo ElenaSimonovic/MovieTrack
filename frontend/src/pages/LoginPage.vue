@@ -82,6 +82,7 @@ const handleLogin = async () => {
     const res = await axios.post('http://localhost:4200/korisnik/prijava', loginData.value)
 
     if (res.data) {
+      localStorage.setItem("token", res.data.token)
       localStorage.setItem("user", JSON.stringify(res.data))
 
       $q.notify({
@@ -91,6 +92,7 @@ const handleLogin = async () => {
         timeout: 2000
       })
 
+      // blokiran user
       if (res.data.status === 'Blokiran') {
         $q.notify({
           type: 'negative',
@@ -98,23 +100,25 @@ const handleLogin = async () => {
         })
         return
       }
-      
+
+      // redirect
       if (res.data.admin) {
-        router.push('/admin').then(() => {
-          window.location.reload()
-        })
+        router.push('/admin')
       } else {
-        router.push('/').then(() => {
-          window.location.reload()
-        })
+        router.push('/')
       }
+
     }
   } catch (err) {
     console.error("Greška pri prijavi:", err)
+
     let message = 'Pogrešan email ili lozinka!'
     if (err.response && err.response.data) {
-      message = typeof err.response.data === 'string' ? err.response.data : 'Greška pri prijavi!'
+      message = typeof err.response.data === 'string'
+        ? err.response.data
+        : 'Greška pri prijavi!'
     }
+
     $q.notify({
       type: 'negative',
       message: message,

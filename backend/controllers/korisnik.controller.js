@@ -1,46 +1,54 @@
 const dbConn = require('../db/connection');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const SECRET = "tajni_kljuc";
 
-exports.registracija = (req, res) => {
+exports.registracija = async (req, res) => {
     const { email, korisnickoIme, lozinka, datumRodjenja } = req.body;
 
-    // DIREKTNO šaljemo lozinku u bazu bez ikakvog šifriranja
-    const sql = `
-        INSERT INTO Korisnik 
-        (Email_korisnika, Lozinka, Korisnicko_ime, Datum_rodjenja, Status_racuna, Admin_da_ne) 
-        VALUES (?, ?, ?, ?, 'Aktivan', 0)
-    `;
-    
-    dbConn.query(
-        sql,
-        [email, lozinka, korisnickoIme, datumRodjenja],
-        (err) => {
-            if (err) {
-                return res.status(500).send("greška" + err.sqlMessage);
-            }
+    try {
+        const hashedPassword = await bcrypt.hash(lozinka, 10);
 
-            const sqlLista = `
-                INSERT INTO Osobna_lista 
-                (Naziv_liste, Email_korisnika, Opis_liste, Status_vidljivosti) 
-                VALUES (?, ?, ?, ?)
-            `;
+        const sql = `
+            INSERT INTO Korisnik 
+            (Email_korisnika, Lozinka, Korisnicko_ime, Datum_rodjenja, Status_racuna, Admin_da_ne) 
+            VALUES (?, ?, ?, ?, 'Aktivan', 0)
+        `;
+        
+        dbConn.query(
+            sql,
+            [email, hashedPassword, korisnickoIme, datumRodjenja],
+            (err) => {
+                if (err) {
+                    return res.status(500).send("greška " + err.sqlMessage);
+                }
 
-            const defaultLists = [
-                ["Želim gledati", email, "Filmovi koje želim gledati", "Privatna"],
-                ["Favoriti", email, "Omiljeni filmovi", "Privatna"]
-            ];
+                const sqlLista = `
+                    INSERT INTO Osobna_lista 
+                    (Naziv_liste, Email_korisnika, Opis_liste, Status_vidljivosti) 
+                    VALUES (?, ?, ?, ?)
+                `;
 
-            dbConn.query(sqlLista, defaultLists[0], (err) => {
-                if (err) return res.status(500).send(err);
+                const defaultLists = [
+                    ["Želim gledati", email, "Filmovi koje želim gledati", "Privatna"],
+                    ["Favoriti", email, "Omiljeni filmovi", "Privatna"]
+                ];
 
-                dbConn.query(sqlLista, defaultLists[1], (err) => {
+                dbConn.query(sqlLista, defaultLists[0], (err) => {
                     if (err) return res.status(500).send(err);
 
-                    res.send("Registracija OK");
+                    dbConn.query(sqlLista, defaultLists[1], (err) => {
+                        if (err) return res.status(500).send(err);
+
+                        res.send("Registracija OK");
+                    });
                 });
-            });
-        }
-    );
+            }
+        );
+
+    } catch (err) {
+        res.status(500).send("Greška pri hashiranju lozinke");
+    }
 };
 
 exports.prijava = (req, res) => {
@@ -48,7 +56,7 @@ exports.prijava = (req, res) => {
 
     const sql = "SELECT * FROM Korisnik WHERE Email_korisnika = ?";
     
-    dbConn.query(sql, [email], (err, result) => {
+    dbConn.query(sql, [email], async (err, result) => {
         if (err) return res.status(500).send("Greška na serveru.");
 
         if (result.length === 0) {
@@ -57,18 +65,32 @@ exports.prijava = (req, res) => {
 
         const user = result[0];
 
-        if (lozinka === user.Lozinka) {
+        try {
+            const match = await bcrypt.compare(lozinka, user.Lozinka);
 
-            res.send({
-                message: "Prijava uspješna",
-                email: user.Email_korisnika,
-                korisnickoIme: user.Korisnicko_ime,
-                admin: user.Admin_da_ne === 1,
-                status: user.Status_racuna
-            });
+            if (match) {
+                const token = jwt.sign(
+                    {
+                        email: user.Email_korisnika,
+                        admin: user.Admin_da_ne === 1
+                    },
+                    SECRET,
+                    { expiresIn: '1h' }
+                );
 
-        } else {
-            res.status(401).send("Pogrešna lozinka.");
+                res.send({
+                    message: "Prijava uspješna",
+                    token,
+                    email: user.Email_korisnika,
+                    korisnickoIme: user.Korisnicko_ime,
+                    admin: user.Admin_da_ne === 1,
+                    status: user.Status_racuna
+                });
+            } else {
+                res.status(401).send("Pogrešna lozinka.");
+            }
+        } catch (err) {
+            res.status(500).send("Greška pri provjeri lozinke");
         }
     });
 };
@@ -101,7 +123,7 @@ exports.changePassword = (req, res) => {
     dbConn.query(
         "SELECT Lozinka FROM Korisnik WHERE Email_korisnika=?",
         [email],
-        (err, result) => {
+        async (err, result) => {
             if (err) return res.status(500).send(err);
 
             if (result.length === 0) {
@@ -110,18 +132,27 @@ exports.changePassword = (req, res) => {
 
             const user = result[0];
 
-            if (oldPassword !== user.Lozinka) {
-                return res.status(401).send("Stara lozinka je kriva");
-            }
+            try {
+                const match = await bcrypt.compare(oldPassword, user.Lozinka);
 
-            dbConn.query(
-                "UPDATE Korisnik SET Lozinka=? WHERE Email_korisnika=?",
-                [newPassword, email],
-                (err) => {
-                    if (err) return res.status(500).send(err);
-                    res.send("Lozinka promijenjena");
+                if (!match) {
+                    return res.status(401).send("Stara lozinka je kriva");
                 }
-            );
+
+                const hashedNew = await bcrypt.hash(newPassword, 10);
+
+                dbConn.query(
+                    "UPDATE Korisnik SET Lozinka=? WHERE Email_korisnika=?",
+                    [hashedNew, email],
+                    (err) => {
+                        if (err) return res.status(500).send(err);
+                        res.send("Lozinka promijenjena");
+                    }
+                );
+
+            } catch (err) {
+                res.status(500).send("Greška pri promjeni lozinke");
+            }
         }
     );
 };

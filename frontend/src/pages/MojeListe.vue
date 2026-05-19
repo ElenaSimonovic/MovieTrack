@@ -28,7 +28,7 @@
           <q-item-section avatar>
             <q-icon :name="list.Status_vidljivosti === 'Privatna' ? 'lock' : 'public'" />
           </q-item-section>
-          
+
           <q-item-section>
             <q-item-label class="text-weight-bold">{{ list.Naziv_liste }}</q-item-label>
             <q-item-label caption :class="$q.dark.isActive ? 'text-grey-5' : ''">
@@ -142,6 +142,8 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import { useQuasar } from 'quasar'
 import { io } from "socket.io-client"
+import { api } from "boot/axios"
+
 
 defineOptions({ name: 'MojeListe' })
 
@@ -167,7 +169,7 @@ const fetchData = async () => {
 
 const fetchMyLists = async () => {
   try {
-    const res = await axios.get(`http://localhost:4200/lista/user/${user.value.email}`)
+    const res = await api.get(`http://localhost:4200/lista/user/${user.value.email}`)
     lists.value = res.data
   } catch (err) {
     console.error(err)
@@ -176,7 +178,7 @@ const fetchMyLists = async () => {
 
 const fetchAllPublic = async () => {
   try {
-    const res = await axios.get(`http://localhost:4200/lista/javne`)
+    const res = await api.get(`http://localhost:4200/lista/javne`)
     publicLists.value = res.data.filter(l => l.Email_korisnika !== user.value.email)
   } catch (err) {
     console.error(err)
@@ -185,7 +187,7 @@ const fetchAllPublic = async () => {
 
 const fetchMoviesForList = async (id) => {
   try {
-    const res = await axios.get(`http://localhost:4200/lista/lista/${id}`)
+    const res = await api.get(`http://localhost:4200/lista/lista/${id}`)
     moviesInList.value[id] = res.data
   } catch (err) {
     console.error(err)
@@ -222,7 +224,7 @@ const createLista = async () => {
   if (!naziv.value) return
   try {
     const status = isPrivate.value ? 'Privatna' : 'Javna'
-    await axios.post('http://localhost:4200/lista', {
+    await api.post('http://localhost:4200/lista', {
       email: user.value.email,
       naziv: naziv.value,
       opis: opis.value,
@@ -241,7 +243,7 @@ const createLista = async () => {
 
 const deleteLista = async (id) => {
   try {
-    await axios.delete('http://localhost:4200/lista', {
+    await api.delete('http://localhost:4200/lista', {
       data: { id_osobne_liste: id }
     })
     await fetchMyLists()
@@ -255,7 +257,7 @@ const deleteLista = async (id) => {
 
 const removeMovie = async (listaId, filmNaziv) => {
   try {
-    await axios.delete('http://localhost:4200/lista/film', {
+    await api.delete('http://localhost:4200/lista/film', {
       data: { id_osobne_liste: listaId, nazivFilma: filmNaziv }
     })
     await fetchMoviesForList(listaId)
@@ -272,6 +274,16 @@ const handleDbUpdate = (data) => {
 }
 
 onMounted(() => {
+  const token = localStorage.getItem("token")
+
+  if (!token) {
+    $q.notify({
+      type: 'negative',
+      message: 'Morate biti prijavljeni'
+    })
+    return
+  }
+
   fetchData()
   socket.on("db-update", handleDbUpdate)
 })

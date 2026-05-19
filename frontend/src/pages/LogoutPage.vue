@@ -4,7 +4,7 @@
       <q-card-section class="column items-center q-gutter-md">
         <!-- Ikona admin panela -->
         <q-icon name="admin_panel_settings" size="80px" color="primary" />
-        
+
         <div class="text-h4 text-bold text-white q-mt-md">
           Admin Panel
         </div>
@@ -31,10 +31,8 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
+import axios from "axios";
 
-defineOptions({
-  name: 'RegistracijaPage' // Zadržano ime iz tvog primjera, iako je stranica za admina
-});
 
 const router = useRouter();
 const $q = useQuasar();
@@ -43,7 +41,8 @@ const handleLogout = () => {
   // 1. Brišemo sve podatke o sesiji korisnika/admina iz localStorage
   localStorage.removeItem("user");
   localStorage.removeItem("token"); // Ako koristiš token, brišemo i njega
-  
+  delete axios.defaults.headers.common['Authorization']
+
   // Opcionalno: Možeš očistiti cijeli localStorage ako ne čuvaš ništa drugo važno
   // localStorage.clear();
 
@@ -56,7 +55,9 @@ const handleLogout = () => {
   });
 
   // 3. Preusmjeravanje na stranicu za prijavu
-  router.push('/login'); // Prilagodi putanju ako ti se login stranica zove drugačije (npr. '/prijava')
+  router.push('/login').then(() => { // Prilagodi putanju ako ti se login stranica zove drugačije (npr. '/prijava')
+    window.location.reload()
+  })
 };
 </script>
 

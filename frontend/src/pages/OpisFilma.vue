@@ -77,7 +77,7 @@
                 class="full-width q-py-md text-weight-bold q-mb-md"
                 @click="openCommentDialog"
               />
-              
+
               <div class="row q-gutter-sm flex-center">
                 <q-btn
                   flat
@@ -119,11 +119,11 @@
                 </div>
 
                 <div v-if="comments.length > 0">
-                  <q-card 
-                    flat 
-                    bordered 
-                    v-for="c in comments" 
-                    :key="c.id_komentara" 
+                  <q-card
+                    flat
+                    bordered
+                    v-for="c in comments"
+                    :key="c.id_komentara"
                     class="q-mb-md comment-card"
                     :dark="$q.dark.isActive"
                   >
@@ -250,10 +250,12 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import axios from "axios";
+import { api } from "boot/axios";
 
 const route = useRoute();
 const router = useRouter();
 const $q = useQuasar();
+const token = localStorage.getItem("token")
 
 const movie = ref(null);
 const lists = ref([]);
@@ -272,9 +274,12 @@ const isEditing = ref(false);
 const editingCommentId = ref(null);
 
 const getCurrentUser = () => {
-  const user = localStorage.getItem("user");
-  if (!user || user === "null") return null;
-  return JSON.parse(user);
+  const token = localStorage.getItem("token")
+  const user = localStorage.getItem("user")
+
+  if (!token || !user) return null
+
+  return JSON.parse(user)
 };
 
 const fetchLists = async () => {
@@ -330,9 +335,9 @@ const addToSpecialList = async (nazivListe) => {
       return;
     }
 
-    await axios.post('http://localhost:4200/lista/film', {
+    await api.post('http://localhost:4200/lista/film', {
       id_osobne_liste: lista.id_osobne_liste,
-      nazivFilma: movie.value.Naziv_filma
+      nazivFilma: movie.value.Naziv_filma,
     });
 
     $q.notify({
@@ -381,18 +386,18 @@ const submitComment = async () => {
 
   try {
     if (isEditing.value) {
-      await axios.put(`http://localhost:4200/komentar/${editingCommentId.value}`, {
+      await api.put(`http://localhost:4200/komentar/${editingCommentId.value}`, {
         sadrzaj: newComment.value.sadrzaj,
         ocjena: newComment.value.ocjena
       });
       $q.notify({ type: 'positive', message: 'Komentar ažuriran!' });
     } else {
-      await axios.post('http://localhost:4200/komentar', {
-        email: user.email,
-        film: movie.value.Naziv_filma,
-        sadrzaj: newComment.value.sadrzaj,
-        ocjena: newComment.value.ocjena
-      });
+        await api.post('http://localhost:4200/komentar', {
+          email: user.email,
+          film: movie.value.Naziv_filma,
+          sadrzaj: newComment.value.sadrzaj,
+          ocjena: newComment.value.ocjena
+        });
       $q.notify({ type: 'positive', message: 'Hvala na recenziji!' });
     }
 
@@ -417,7 +422,7 @@ const deleteComment = (id) => {
     dark: $q.dark.isActive
   }).onOk(async () => {
     try {
-      await axios.delete(`http://localhost:4200/komentar/${id}`);
+      await api.delete(`http://localhost:4200/komentar/${id}`);
       $q.notify({ type: 'positive', message: 'Komentar uspješno obrisan.', icon: 'delete' });
       fetchComments();
     } catch (err) {
@@ -428,7 +433,7 @@ const deleteComment = (id) => {
 
 const confirmAddToList = async () => {
   try {
-    await axios.post('http://localhost:4200/lista/film', {
+    await api.post('http://localhost:4200/lista/film', {
       id_osobne_liste: selectedList.value,
       nazivFilma: movie.value.Naziv_filma
     });
@@ -452,6 +457,7 @@ const formatYear = (d) => d ? new Date(d).getFullYear() : "N/A";
 const formatDate = (d) => new Date(d).toLocaleDateString('hr-HR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
 onMounted(() => {
+
   fetchMovieDetail();
   fetchLists();
 });
@@ -474,9 +480,9 @@ body.body--dark .page-detail {
 .movie-detail-card { border-radius: 20px !important; overflow: hidden; }
 
 /* Profinjeni kinematografski gradijent od skroz crne prema tamnoj nijansi */
-.hero-section { 
-  background: linear-gradient(to right, #26a69a, #12162e); 
-  min-height: 250px; 
+.hero-section {
+  background: linear-gradient(to right, #26a69a, #12162e);
+  min-height: 250px;
 }
 
 body.body--dark .movie-detail-card {
@@ -494,13 +500,13 @@ body.body--dark .bg-surface {
 }
 
 /* Info kartice (Godina, Jezik) - ističu se s blagim obrubom u tamnom načinu */
-.info-card { 
-  display: flex; 
-  align-items: center; 
-  background: #fdfdfd; 
-  padding: 16px; 
-  border-radius: 12px; 
-  border: 1px solid #edf2f7; 
+.info-card {
+  display: flex;
+  align-items: center;
+  background: #fdfdfd;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #edf2f7;
 }
 body.body--dark .info-card {
   background: #050505;
@@ -509,10 +515,10 @@ body.body--dark .info-card {
 
 .info-label { font-size: 0.75rem; color: #a0aec0; text-transform: uppercase; font-weight: bold; }
 
-.movie-description { 
-  font-size: 1.1rem; 
-  line-height: 1.8; 
-  color: #4a5568; 
+.movie-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #4a5568;
 }
 body.body--dark .movie-description {
   color: #cbd5e1;
