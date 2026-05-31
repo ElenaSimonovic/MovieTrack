@@ -162,12 +162,16 @@ const socket = io("http://localhost:4200")
 const fetchData = async () => {
   const storedUser = localStorage.getItem("user")
   if (!storedUser) return
+
   user.value = JSON.parse(storedUser)
+
   await fetchMyLists()
   await fetchAllPublic()
 }
 
 const fetchMyLists = async () => {
+  if (!user.value?.email) return
+console.log("USER:", user.value)
   try {
     const res = await api.get(`http://localhost:4200/lista/user/${user.value.email}`)
     lists.value = res.data
@@ -239,6 +243,8 @@ const createLista = async () => {
   } catch (err) {
     console.error(err)
   }
+
+
 }
 
 const deleteLista = async (id) => {
@@ -275,14 +281,17 @@ const handleDbUpdate = (data) => {
 
 onMounted(() => {
   const token = localStorage.getItem("token")
+  const storedUser = localStorage.getItem("user")
 
-  if (!token) {
+  if (!token || !storedUser) {
     $q.notify({
       type: 'negative',
       message: 'Morate biti prijavljeni'
     })
     return
   }
+
+
 
   fetchData()
   socket.on("db-update", handleDbUpdate)
