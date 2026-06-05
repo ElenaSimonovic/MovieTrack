@@ -83,21 +83,7 @@ exports.addFilmToList = (req, res) => {
 
 };
 
-// makni film iz liste
-exports.removeFilmFromList = (req, res) => {
-    const { id_osobne_liste, nazivFilma } = req.body;
 
-    dbConn.query(
-        "DELETE FROM Film_u_osobnoj_listi WHERE id_osobne_liste=? AND Naziv_filma=?",
-        [id_osobne_liste, nazivFilma],
-        (err) => {
-            if (err) return res.status(500).send(err);
-            const io = req.app.get("io");
-            io.emit("db-update", { action: "movie-removed" });
-            res.send("Film uklonjen iz liste");
-        }
-    );
-};
 
 // dohvati filmove iz liste
 exports.getFilmsFromList = (req, res) => {
