@@ -182,11 +182,24 @@
           class="movie-card shadow-2"
           :class="$q.dark.isActive ? 'bg-grey-10 text-white' : 'bg-white'"
           @click="$router.push('/film/' + movie.Naziv_filma)"
-          style="cursor: pointer; border: none;"
-        >
-          <div class="movie-icon-container" :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-f8f9fa'">
-            <q-icon name="movie" size="100px" :color="$q.dark.isActive ? 'grey-6' : 'grey-7'" />
-          </div>
+          style="cursor: pointer; border: none;">
+        <q-img
+          v-if="movie.Slika"
+          :src="movie.Slika"
+          class="movie-poster"
+          fit="cover"
+          spinner-color="secondary"
+        />
+
+        <div
+          v-else
+          class="movie-icon-container"
+          :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-f8f9fa'">
+          <q-icon
+            name="movie"
+            size="100px"
+            :color="$q.dark.isActive ? 'grey-6' : 'grey-7'" />
+        </div>
 
           <q-card-section>
             <div class="movie-title text-weight-bold" :class="$q.dark.isActive ? 'text-white' : ''">
@@ -493,5 +506,9 @@ END:VCALENDAR
   aspect-ratio: 16/9;
   display: block;
   background: black;
+}
+.movie-poster {
+  width: 100%;
+  height: 250px;
 }
 </style>

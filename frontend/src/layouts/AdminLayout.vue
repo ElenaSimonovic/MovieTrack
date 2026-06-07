@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          🛡️ MovieTrack Admin panel
+           MovieTrack Admin panel
         </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>

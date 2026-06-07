@@ -53,21 +53,26 @@
             <div class="text-subtitle2 q-mb-sm">Filmovi u listi:</div>
 
             <q-list dense separator v-if="moviesInList[list.id_osobne_liste] && moviesInList[list.id_osobne_liste].length > 0">
-              <q-item v-for="film in moviesInList[list.id_osobne_liste]" :key="film.Naziv_filma">
-                <q-item-section>
-                  {{ film.Naziv_filma }}
-                </q-item-section>
-                <q-item-section side>
-                  <q-btn
-                    flat
-                    round
-                    size="sm"
-                    icon="close"
-                    color="grey-7"
-                    @click="confirmRemoveMovie(list.id_osobne_liste, film.Naziv_filma)"
-                  />
-                </q-item-section>
-              </q-item>
+            <q-item
+              v-for="film in moviesInList[list.id_osobne_liste]"
+              :key="film.Naziv_filma"
+              clickable
+              @click="$router.push('/film/' + (film.Naziv_filma))">
+              <q-item-section class="text-primary">
+                {{ film.Naziv_filma }}
+              </q-item-section>
+
+              <q-item-section side>
+                <q-btn
+                  flat
+                  round
+                  size="sm"
+                  icon="close"
+                  color="grey-7"
+                  @click.stop="confirmRemoveMovie(list.id_osobne_liste, film.Naziv_filma)"
+                />
+              </q-item-section>
+            </q-item>
             </q-list>
 
             <div v-else class="text-grey-6 q-pa-sm italic">
@@ -104,9 +109,15 @@
           >
             <q-list dense class="q-px-md q-pb-sm">
               <template v-if="moviesInList[pub.id_osobne_liste] && moviesInList[pub.id_osobne_liste].length > 0">
-                <q-item v-for="f in moviesInList[pub.id_osobne_liste]" :key="f.Naziv_filma">
-                  <q-item-section>• {{ f.Naziv_filma }}</q-item-section>
-                </q-item>
+              <q-item
+                v-for="f in moviesInList[pub.id_osobne_liste]"
+                :key="f.Naziv_filma"
+                clickable
+                @click="$router.push('/film/' + (f.Naziv_filma))">
+                <q-item-section class="text-primary cursor-pointer">
+                  • {{ f.Naziv_filma }}
+                </q-item-section>
+              </q-item>
               </template>
               <div v-else class="text-caption q-pa-sm text-grey">Prazna lista</div>
             </q-list>
